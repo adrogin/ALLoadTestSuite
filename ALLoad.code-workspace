@@ -1,0 +1,23 @@
+{
+	"folders": [
+		{
+			"path": "app"
+		},
+		{
+			"path": "test"
+		}
+	],
+	"settings": {
+		"al.enableCodeAnalysis": true,
+		"al.codeAnalyzers": [
+			"${CodeCop}",
+			"${UICop}"
+		],
+		"CRS.FileNamePattern": "<ObjectNameShort>.<ObjectTypeShortPascalCase>.al",
+		"CRS.FileNamePatternExtensions": "<ObjectNameShort>.<ObjectTypeShortPascalCase>.al",
+		"CRS.FileNamePatternPageCustomizations": "<ObjectNameShort>.<ObjectTypeShortPascalCase>.al",
+		"CRS.OnSaveAlFileAction": "Rename",
+		"CRS.ObjectNamePrefix": "ALD ",
+		"al.ruleSetPath": ".\\.vscode\\alload.ruleset.json"
+	}
+}

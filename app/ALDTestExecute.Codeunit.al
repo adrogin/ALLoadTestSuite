@@ -1,0 +1,210 @@
+codeunit 55100 "ALD Test - Execute"
+{
+    procedure RunTestBatch(BatchName: Code[20])
+    begin
+        VerifyNoRunningTest();
+        CleanActiveBatch();
+        StartBatch(BatchName);
+        // TODO: move to completed only when all sessions are executed
+        MoveBatchToCompleted();
+    end;
+
+    local procedure AllTestsCompleted(): Boolean
+    var
+        ActiveTestSession: Record "ALD Active Test Session";
+    begin
+        ActiveTestSession.SetFilter(State, '%1|%2', ActiveTestSession.State::Ready, ActiveTestSession.State::Running);
+        exit(ActiveTestSession.IsEmpty());
+    end;
+
+    procedure IsActiveBatchStarted(): Boolean
+    var
+        ActiveTestTask: Record "ALD Active Test Task";
+    begin
+        ActiveTestTask.SetFilter(State, '>%1', ActiveTestTask.State::Ready);
+        exit(not ActiveTestTask.IsEmpty());
+    end;
+
+    procedure IsActiveBatchRunning(): Boolean
+    begin
+        if not IsActiveBatchStarted() then
+            exit(false);
+
+        exit(not AllTestsCompleted());
+    end;
+
+    local procedure CleanActiveBatch()
+    var
+        LoadTestActiveBatch: Record "ALD Active Test Batch";
+    begin
+        LoadTestActiveBatch.DeleteAll(true);
+    end;
+
+    local procedure CopyBatchSessionToActive(BatchSession: Record "ALD Batch Session")
+    var
+        ActiveTestBatch: Record "ALD Active Test Batch";
+        TestSession: Record "ALD Test Session";
+        ActiveTestSession: Record "ALD Active Test Session";
+        CloneCount: Integer;
+    begin
+        ActiveTestBatch.Get(BatchSession."Batch Name");
+        TestSession.Get(BatchSession."Session Code");
+        CloneCount := 1;
+
+        while CloneCount <= TestSession."No. of Clones" do begin
+            ActiveTestSession.Validate("Batch Name", BatchSession."Batch Name");
+            ActiveTestSession.Validate("Session No.", TestSession.Code);
+            ActiveTestSession.Validate("Clone No.", CloneCount);
+            ActiveTestSession.Validate("Company Name", BatchSession."Company Name");
+            ActiveTestSession.Validate(
+                "Scheduled Start DateTime",
+                ActiveTestBatch."Start DateTime" + TestSession."Session Start Delay" + TestSession."Delay Between Clones" * (CloneCount - 1));
+            ActiveTestSession.Insert(true);
+
+            CopySessionTasksToActive(ActiveTestSession);
+
+            CloneCount += 1;
+        end;
+    end;
+
+    local procedure CopySessionTasksToActive(LoadTestActiveSession: Record "ALD Active Test Session")
+    var
+        TestTask: Record "ALD Test Task";
+        ActiveTestTask: Record "ALD Active Test Task";
+    begin
+        TestTask.SetRange("Session Code", LoadTestActiveSession."Session No.");
+        if TestTask.FindSet() then
+            repeat
+                ActiveTestTask.Validate("Batch Name", LoadTestActiveSession."Batch Name");
+                ActiveTestTask.Validate("Session No.", LoadTestActiveSession."Session No.");
+                ActiveTestTask.Validate("Session Clone No.", LoadTestActiveSession."Clone No.");
+                ActiveTestTask.Validate("Task No.", TestTask."Task No.");
+                ActiveTestTask.Validate("Object Type", TestTask."Object Type");
+                ActiveTestTask.Validate("Object ID", TestTask."Object ID");
+                ActiveTestTask.Validate(Description, TestTask.Description);
+                ActiveTestTask.Insert(true);
+            until TestTask.Next() = 0;
+    end;
+
+    local procedure GetNextTestBatchNo(): Integer
+    var
+        CompletedTestBatch: Record "ALD Completed Test Batch";
+    begin
+        if not CompletedTestBatch.FindLast() then
+            exit(1);
+
+        exit(CompletedTestBatch."Test Run No." + 1);
+    end;
+
+    local procedure MoveBatchToCompleted()
+    var
+        ActiveTestBatch: Record "ALD Active Test Batch";
+        CompletedTestBatch: Record "ALD Completed Test Batch";
+    begin
+        ActiveTestBatch.FindFirst();
+        CompletedTestBatch.Validate("Test Run No.", GetNextTestBatchNo());
+        CompletedTestBatch.Validate("Test Batch Name", ActiveTestBatch."Batch Name");
+        CompletedTestBatch.Validate("Start DateTime", ActiveTestBatch."Start DateTime");
+        CompletedTestBatch.Validate("End DateTime", CurrentDateTime());
+        CompletedTestBatch.Insert(true);
+
+        MoveSessionsToCompleted(CompletedTestBatch);
+    end;
+
+    local procedure MoveSessionsToCompleted(CompletedTestBatch: Record "ALD Completed Test Batch")
+    var
+        ActiveTestSession: Record "ALD Active Test Session";
+        CompletedTestSession: Record "ALD Completed Test Session";
+    begin
+        ActiveTestSession.LockTable();
+        if ActiveTestSession.FindSet() then
+            repeat
+                CompletedTestSession.TransferFields(ActiveTestSession, true);
+                CompletedTestSession.Validate("Test Run No.", CompletedTestBatch."Test Run No.");
+                CompletedTestSession.Insert(true);
+
+                MoveTasksToCompleted(CompletedTestSession);
+            until ActiveTestSession.Next() = 0;
+    end;
+
+    local procedure MoveTasksToCompleted(CompletedTestSession: Record "ALD Completed Test Session")
+    var
+        ActiveTestTask: Record "ALD Active Test Task";
+        CompletedTestTask: Record "ALD Completed Test Task";
+    begin
+        ActiveTestTask.LockTable();
+        ActiveTestTask.SetRange("Batch Name", CompletedTestSession."Test Batch Name");
+        ActiveTestTask.SetRange("Session No.", CompletedTestSession."Session No.");
+        ActiveTestTask.SetRange("Session Clone No.", CompletedTestSession."Clone No.");
+        if ActiveTestTask.FindSet(true) then
+            repeat
+                CompletedTestTask.Validate("Test Run No.", CompletedTestSession."Test Run No.");
+                CompletedTestTask.TransferFields(ActiveTestTask, true);
+                CompletedTestTask.Insert(true);
+            until ActiveTestTask.Next() = 0;
+    end;
+
+    procedure StartBatch(BatchName: Code[20])
+    var
+        ActiveTestBatch: Record "ALD Active Test Batch";
+        BatchSession: Record "ALD Batch Session";
+    begin
+        ActiveTestBatch.Validate("Batch Name", BatchName);
+        ActiveTestBatch.Validate("Start DateTime", CurrentDateTime);
+        ActiveTestBatch.Insert(true);
+
+        BatchSession.SetRange("Batch Name", BatchName);
+        if BatchSession.FindSet() then begin
+            repeat
+                CopyBatchSessionToActive(BatchSession);
+            until BatchSession.Next() = 0;
+
+            RunSessionControlLoop();
+        end;
+    end;
+
+    local procedure RunSessionControlLoop()
+    var
+        LoadTestSetup: Record "ALD Setup";
+        ActiveTestSession: Record "ALD Active Test Session";
+    begin
+        LoadTestSetup.Get();
+        LoadTestSetup.TestField("Task Update Frequency");
+
+        while not (AllTestsCompleted() or TerminateSignal) do begin
+            ActiveTestSession.SetRange(State, ActiveTestSession.State::Ready);
+            ActiveTestSession.SetFilter("Scheduled Start DateTime", '<=%1', CurrentDateTime);
+            if ActiveTestSession.FindSet(true) then
+                repeat
+                    StartTestSession(ActiveTestSession);
+                until ActiveTestSession.Next() = 0;
+
+            Sleep(LoadTestSetup."Task Update Frequency");
+        end;
+    end;
+
+    local procedure StartTestSession(var ActiveTestSession: Record "ALD Active Test Session")
+    var
+        TestSession: Record "ALD Test Session";
+    begin
+        TestSession.Get(ActiveTestSession."Session No.");
+        if StartSession(ActiveTestSession."Client Session ID", Codeunit::"ALD Session Controller", TestSession."Company Name", TestSession) then begin
+            ActiveTestSession.Validate(State, ActiveTestSession.State::Running);
+            ActiveTestSession.Validate("Start DateTime", CurrentDateTime);
+        end
+        else
+            ActiveTestSession.Validate(State, ActiveTestSession.State::Failed);
+
+        ActiveTestSession.Modify(true)
+    end;
+
+    procedure VerifyNoRunningTest()
+    begin
+        if IsActiveBatchRunning() then
+            Error(CannotRunMultipleBatchesErr);
+    end;
+
+    var
+        TerminateSignal: Boolean;
+        CannotRunMultipleBatchesErr: Label 'Test batch cannot start while another batch is running. Wait for the active batch to complete or stop it manually and try again.';
+}

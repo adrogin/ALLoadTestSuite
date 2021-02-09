@@ -1,0 +1,30 @@
+{
+  "id": "18d659d4-9150-4369-b495-da0840e902ad",
+  "name": "ALLoad",
+  "publisher": "ADR",
+  "version": "1.0.0.0",
+  "brief": "",
+  "description": "",
+  "privacyStatement": "",
+  "EULA": "",
+  "help": "",
+  "url": "",
+  "logo": "",
+  "dependencies": [],
+  "screenshots": [],
+  "platform": "14.0.0.0",
+  "application": "14.0.0.0",
+  "idRanges": [
+    {
+      "from": 55100,
+      "to": 55149
+    },
+    {
+      "from": 59100,
+      "to": 59999
+    }
+  ],
+  "contextSensitiveHelpUrl": "https://ALLoad.com/help/",
+  "showMyCode": true,
+  "runtime": "3.0"
+}
