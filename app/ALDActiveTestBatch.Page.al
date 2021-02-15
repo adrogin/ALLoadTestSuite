@@ -2,7 +2,7 @@ page 55106 "ALD Active Test Batch"
 {
     PageType = Card;
     ApplicationArea = All;
-    UsageCategory = Administration;
+    UsageCategory = Tasks;
     SourceTable = "ALD Active Test Batch";
     Caption = 'Active Load Test Batch';
     Editable = false;
@@ -29,20 +29,37 @@ page 55106 "ALD Active Test Batch"
                     ToolTip = 'Date and time when the running batch started.';
                 }
             }
-            group(TestSessions)
+            part(ActiveTestSessions; "ALD Active Sessions Subpage")
             {
-                part(ActiveTestSessions; "ALD Active Sessions Subpage")
-                {
-                    SubPageLink = "Batch Name" = field("Batch Name");
-                }
+                SubPageLink = "Batch Name" = field("Batch Name");
+                ApplicationArea = All;
             }
-            group(TestTasks)
+
+            part(ActiveTestTasks; "ALD Active Tasks Subpage")
             {
-                part(ActiveTestTasks; "ALD Active Tasks Subpage")
-                {
-                    Provider = ActiveTestSessions;
-                    SubPageLink = "Batch Name" = field("Batch Name"), "Session No." = field("Session No."), "Session Clone No." = field("Clone No.");
-                }
+                Provider = ActiveTestSessions;
+                SubPageLink = "Batch Name" = field("Batch Name"), "Session No." = field("Session No."), "Session Clone No." = field("Clone No.");
+                ApplicationArea = All;
+            }
+        }
+    }
+
+    actions
+    {
+        area(Processing)
+        {
+            action(TerminateBatch)
+            {
+                Caption = 'Terminate Batch';
+                ToolTip = 'Terminates the execution of the active test batch. All test sessions will be stopped immediately.';
+                ApplicationArea = All;
+
+                trigger OnAction()
+                var
+                    SessionController: Codeunit "ALD Session Controller";
+                begin
+                    SessionController.TerminateActiveSessions();
+                end;
             }
         }
     }

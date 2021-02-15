@@ -5,11 +5,9 @@ codeunit 55100 "ALD Test - Execute"
         VerifyNoRunningTest();
         CleanActiveBatch();
         StartBatch(BatchName);
-        // TODO: move to completed only when all sessions are executed
-        MoveBatchToCompleted();
     end;
 
-    local procedure AllTestsCompleted(): Boolean
+    procedure AllTestsCompleted(): Boolean
     var
         ActiveTestSession: Record "ALD Active Test Session";
     begin
@@ -86,68 +84,11 @@ codeunit 55100 "ALD Test - Execute"
             until TestTask.Next() = 0;
     end;
 
-    local procedure GetNextTestBatchNo(): Integer
-    var
-        CompletedTestBatch: Record "ALD Completed Test Batch";
-    begin
-        if not CompletedTestBatch.FindLast() then
-            exit(1);
-
-        exit(CompletedTestBatch."Test Run No." + 1);
-    end;
-
-    local procedure MoveBatchToCompleted()
-    var
-        ActiveTestBatch: Record "ALD Active Test Batch";
-        CompletedTestBatch: Record "ALD Completed Test Batch";
-    begin
-        ActiveTestBatch.FindFirst();
-        CompletedTestBatch.Validate("Test Run No.", GetNextTestBatchNo());
-        CompletedTestBatch.Validate("Test Batch Name", ActiveTestBatch."Batch Name");
-        CompletedTestBatch.Validate("Start DateTime", ActiveTestBatch."Start DateTime");
-        CompletedTestBatch.Validate("End DateTime", CurrentDateTime());
-        CompletedTestBatch.Insert(true);
-
-        MoveSessionsToCompleted(CompletedTestBatch);
-    end;
-
-    local procedure MoveSessionsToCompleted(CompletedTestBatch: Record "ALD Completed Test Batch")
-    var
-        ActiveTestSession: Record "ALD Active Test Session";
-        CompletedTestSession: Record "ALD Completed Test Session";
-    begin
-        ActiveTestSession.LockTable();
-        if ActiveTestSession.FindSet() then
-            repeat
-                CompletedTestSession.TransferFields(ActiveTestSession, true);
-                CompletedTestSession.Validate("Test Run No.", CompletedTestBatch."Test Run No.");
-                CompletedTestSession.Insert(true);
-
-                MoveTasksToCompleted(CompletedTestSession);
-            until ActiveTestSession.Next() = 0;
-    end;
-
-    local procedure MoveTasksToCompleted(CompletedTestSession: Record "ALD Completed Test Session")
-    var
-        ActiveTestTask: Record "ALD Active Test Task";
-        CompletedTestTask: Record "ALD Completed Test Task";
-    begin
-        ActiveTestTask.LockTable();
-        ActiveTestTask.SetRange("Batch Name", CompletedTestSession."Test Batch Name");
-        ActiveTestTask.SetRange("Session No.", CompletedTestSession."Session No.");
-        ActiveTestTask.SetRange("Session Clone No.", CompletedTestSession."Clone No.");
-        if ActiveTestTask.FindSet(true) then
-            repeat
-                CompletedTestTask.Validate("Test Run No.", CompletedTestSession."Test Run No.");
-                CompletedTestTask.TransferFields(ActiveTestTask, true);
-                CompletedTestTask.Insert(true);
-            until ActiveTestTask.Next() = 0;
-    end;
-
     procedure StartBatch(BatchName: Code[20])
     var
         ActiveTestBatch: Record "ALD Active Test Batch";
         BatchSession: Record "ALD Batch Session";
+        SessionId: Integer;
     begin
         ActiveTestBatch.Validate("Batch Name", BatchName);
         ActiveTestBatch.Validate("Start DateTime", CurrentDateTime);
@@ -159,43 +100,12 @@ codeunit 55100 "ALD Test - Execute"
                 CopyBatchSessionToActive(BatchSession);
             until BatchSession.Next() = 0;
 
-            RunSessionControlLoop();
+            Commit();
+
+            StartSession(SessionId, Codeunit::"ALD Session Controller");
+            ActiveTestBatch.Validate("Controller Session ID", SessionId);
+            ActiveTestBatch.Modify(true);
         end;
-    end;
-
-    local procedure RunSessionControlLoop()
-    var
-        LoadTestSetup: Record "ALD Setup";
-        ActiveTestSession: Record "ALD Active Test Session";
-    begin
-        LoadTestSetup.Get();
-        LoadTestSetup.TestField("Task Update Frequency");
-
-        while not (AllTestsCompleted() or TerminateSignal) do begin
-            ActiveTestSession.SetRange(State, ActiveTestSession.State::Ready);
-            ActiveTestSession.SetFilter("Scheduled Start DateTime", '<=%1', CurrentDateTime);
-            if ActiveTestSession.FindSet(true) then
-                repeat
-                    StartTestSession(ActiveTestSession);
-                until ActiveTestSession.Next() = 0;
-
-            Sleep(LoadTestSetup."Task Update Frequency");
-        end;
-    end;
-
-    local procedure StartTestSession(var ActiveTestSession: Record "ALD Active Test Session")
-    var
-        TestSession: Record "ALD Test Session";
-    begin
-        TestSession.Get(ActiveTestSession."Session No.");
-        if StartSession(ActiveTestSession."Client Session ID", Codeunit::"ALD Session Controller", TestSession."Company Name", TestSession) then begin
-            ActiveTestSession.Validate(State, ActiveTestSession.State::Running);
-            ActiveTestSession.Validate("Start DateTime", CurrentDateTime);
-        end
-        else
-            ActiveTestSession.Validate(State, ActiveTestSession.State::Failed);
-
-        ActiveTestSession.Modify(true)
     end;
 
     procedure VerifyNoRunningTest()
@@ -205,6 +115,5 @@ codeunit 55100 "ALD Test - Execute"
     end;
 
     var
-        TerminateSignal: Boolean;
         CannotRunMultipleBatchesErr: Label 'Test batch cannot start while another batch is running. Wait for the active batch to complete or stop it manually and try again.';
 }

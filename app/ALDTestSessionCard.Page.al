@@ -44,6 +44,7 @@ page 55105 "ALD Test Session Card"
             part(SessionTasksSubform; "ALD Test Session Subform")
             {
                 SubPageLink = "Session Code" = field(Code);
+                ApplicationArea = All;
             }
         }
     }

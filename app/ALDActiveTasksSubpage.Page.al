@@ -2,6 +2,7 @@ page 55108 "ALD Active Tasks Subpage"
 {
     PageType = ListPart;
     SourceTable = "ALD Active Test Task";
+    Caption = 'Active Test Tasks';
 
     layout
     {
@@ -32,6 +33,21 @@ page 55108 "ALD Active Tasks Subpage"
                 {
                     ApplicationArea = All;
                     ToolTip = 'Name of the object executed in the test task.';
+                }
+                field(State; Rec.State)
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Current task state.';
+                }
+                field(StartDateTime; Rec."Start DateTime")
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Date and time when the task was started.';
+                }
+                field(EndDateTime; Rec."End DateTime")
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Date and time when the task was completed or terminated.';
                 }
             }
         }

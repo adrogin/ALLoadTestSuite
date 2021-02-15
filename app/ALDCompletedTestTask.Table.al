@@ -72,6 +72,11 @@ table 55112 "ALD Completed Test Task"
             CalcFormula = lookup(AllObjWithCaption."Object Name" where("Object Type" = field("Object Type"), "Object ID" = field("Object ID")));
             Editable = false;
         }
+        field(110; Description; Text[30])
+        {
+            Caption = 'Description';
+            Editable = false;
+        }
     }
 
     keys

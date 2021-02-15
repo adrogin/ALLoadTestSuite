@@ -5,6 +5,7 @@ page 55101 "ALD Test Batches"
     UsageCategory = Lists;
     SourceTable = "ALD Test Batch";
     Caption = 'Load Test Batches';
+    PromotedActionCategories = 'New,Process,Report,Manage';
 
     layout
     {
@@ -39,6 +40,9 @@ page 55101 "ALD Test Batches"
                 ApplicationArea = All;
                 ToolTip = 'Executes the selected test batch';
                 Image = ExecuteBatch;
+                Promoted = true;
+                PromotedIsBig = true;
+                PromotedCategory = Category4;
 
                 trigger OnAction();
                 var
@@ -57,9 +61,12 @@ page 55101 "ALD Test Batches"
                 Caption = 'Sessions';
                 ApplicationArea = All;
                 ToolTip = 'Open the list of batch sessions';
-                Image = AdministrationSalesPurchases;
+                Image = WorkflowSetup;
                 RunObject = page "ALD Batch Sessions";
                 RunPageLink = "Batch Name" = field(Name);
+                Promoted = true;
+                PromotedIsBig = true;
+                PromotedCategory = Category4;
             }
         }
     }

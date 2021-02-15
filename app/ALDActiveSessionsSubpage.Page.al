@@ -2,6 +2,7 @@ page 55107 "ALD Active Sessions Subpage"
 {
     PageType = ListPart;
     SourceTable = "ALD Active Test Session";
+    Caption = 'Active Test Sessions';
 
     layout
     {

@@ -1,6 +1,6 @@
 {
   "id": "bf11f770-0170-4bbc-9d9c-c4f88783d5b0",
-  "name": "ALLoad_Test",
+  "name": "ALLoadTest",
   "publisher": "ADR",
   "version": "1.0.0.0",
   "brief": "",
@@ -12,6 +12,18 @@
   "logo": "",
   "dependencies": [
     {
+      "id": "63ca2fa4-4f03-4f2b-a480-172fef340d3f",
+      "publisher": "Microsoft",
+      "name": "System Application",
+      "version": "1.0.0.0"
+    },
+    {
+      "id": "437dbf0e-84ff-417a-965d-ed2bb9650972",
+      "publisher": "Microsoft",
+      "name": "Base Application",
+      "version": "16.0.0.0"
+    },
+    {
       "appId": "18d659d4-9150-4369-b495-da0840e902ad",
       "publisher": "ADR",
       "name": "ALLoad",
@@ -19,9 +31,7 @@
     }
   ],
   "screenshots": [],
-  "platform": "14.0.0.0",
-  "application": "14.0.0.0",
-  "test": "14.0.0.0",
+  "platform": "16.0.0.0",
   "idRanges": [
     {
       "from": 65100,
@@ -32,7 +42,7 @@
       "to": 69999
     }
   ],
-  "contextSensitiveHelpUrl": "https://test.com/help/",
+  "contextSensitiveHelpUrl": "https://app.com/help/",
   "showMyCode": true,
-  "runtime": "3.0"
+  "runtime": "5.0"
 }

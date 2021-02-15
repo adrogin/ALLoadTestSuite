@@ -1,62 +1,135 @@
-codeunit 55102 "ALD Session Controller"
+codeunit 55104 "ALD Session Controller"
 {
-    TableNo = "ALD Active Test Session";
-
     trigger OnRun()
     begin
-        RunSessionTasks(Rec);
+        RunSessionControlLoop();
     end;
 
-    local procedure RunSessionTasks(LoadTestActiveSession: Record "ALD Active Test Session")
+    local procedure GetNextTestBatchNo(): Integer
+    var
+        CompletedTestBatch: Record "ALD Completed Test Batch";
+    begin
+        if not CompletedTestBatch.FindLast() then
+            exit(1);
+
+        exit(CompletedTestBatch."Test Run No." + 1);
+    end;
+
+    local procedure MoveBatchToCompleted()
+    var
+        ActiveTestBatch: Record "ALD Active Test Batch";
+        CompletedTestBatch: Record "ALD Completed Test Batch";
+    begin
+        ActiveTestBatch.FindFirst();
+        CompletedTestBatch.Validate("Test Run No.", GetNextTestBatchNo());
+        CompletedTestBatch.Validate("Test Batch Name", ActiveTestBatch."Batch Name");
+        CompletedTestBatch.Validate("Start DateTime", ActiveTestBatch."Start DateTime");
+        CompletedTestBatch.Validate("End DateTime", CurrentDateTime());
+        CompletedTestBatch.Insert(true);
+
+        MoveSessionsToCompleted(CompletedTestBatch);
+    end;
+
+    local procedure MoveSessionsToCompleted(CompletedTestBatch: Record "ALD Completed Test Batch")
+    var
+        ActiveTestSession: Record "ALD Active Test Session";
+        CompletedTestSession: Record "ALD Completed Test Session";
+    begin
+        ActiveTestSession.LockTable();
+        if ActiveTestSession.FindSet() then
+            repeat
+                CompletedTestSession.TransferFields(ActiveTestSession, true);
+                CompletedTestSession.Validate("Test Run No.", CompletedTestBatch."Test Run No.");
+                CompletedTestSession.Insert(true);
+
+                MoveTasksToCompleted(CompletedTestSession);
+            until ActiveTestSession.Next() = 0;
+    end;
+
+    local procedure MoveTasksToCompleted(CompletedTestSession: Record "ALD Completed Test Session")
     var
         ActiveTestTask: Record "ALD Active Test Task";
-        TaskRunner: Codeunit "ALD Task Runner";
+        CompletedTestTask: Record "ALD Completed Test Task";
     begin
-        ActiveTestTask.SetRange("Session No.", LoadTestActiveSession."Session No.");
-        ActiveTestTask.SetRange("Session Clone No.", LoadTestActiveSession."Clone No.");
-        if ActiveTestTask.FindSet() then
+        ActiveTestTask.LockTable();
+        ActiveTestTask.SetRange("Batch Name", CompletedTestSession."Test Batch Name");
+        ActiveTestTask.SetRange("Session No.", CompletedTestSession."Session No.");
+        ActiveTestTask.SetRange("Session Clone No.", CompletedTestSession."Clone No.");
+        if ActiveTestTask.FindSet(true) then
             repeat
-                SetTaskStatusRunning(ActiveTestTask);
-                if TaskRunner.Run(ActiveTestTask) then
-                    SetTaskStatusCompleted(ActiveTestTask)
-                else
-                    SetTaskStatusFailed(ActiveTestTask);
+                CompletedTestTask.Validate("Test Run No.", CompletedTestSession."Test Run No.");
+                CompletedTestTask.TransferFields(ActiveTestTask, true);
+                CompletedTestTask.Insert(true);
             until ActiveTestTask.Next() = 0;
     end;
 
-    local procedure SetTaskStatusRunning(var ActiveTestTask: Record "ALD Active Test Task")
-    begin
-        ActiveTestTask.Validate(State, ActiveTestTask.State::Running);
-        ActiveTestTask.Validate("Start DateTime", CurrentDateTime);
-        ActiveTestTask.Modify(true);
-    end;
-
-    local procedure SetTaskStatusCompleted(var ActiveTestTask: Record "ALD Active Test Task")
-    begin
-        ActiveTestTask.Validate(State, ActiveTestTask.State::Completed);
-        ActiveTestTask.Validate("End DateTime", CurrentDateTime);
-        ActiveTestTask.Modify(true);
-    end;
-
-    local procedure SetTaskStatusFailed(var ActiveTestTask: Record "ALD Active Test Task")
+    local procedure RunSessionControlLoop()
     var
-        ActiveTaskError: Record "ALD Active Task Error";
-        BlobOutStream: OutStream;
+        LoadTestSetup: Record "ALD Setup";
+        ActiveTestSession: Record "ALD Active Test Session";
     begin
-        ActiveTestTask.Validate(State, ActiveTestTask.State::Failed);
-        ActiveTestTask.Validate("End DateTime", CurrentDateTime);
-        ActiveTestTask.Modify(true);
+        LoadTestSetup.Get();
+        LoadTestSetup.TestField("Task Update Frequency");
 
-        ActiveTaskError.Validate("Batch Name", ActiveTestTask."Batch Name");
-        ActiveTaskError.Validate("Session No.", ActiveTestTask."Session No.");
-        ActiveTaskError.Validate("Session Clone No.", ActiveTestTask."Session Clone No.");
-        ActiveTaskError.Validate("Task No.", ActiveTestTask."Task No.");
-        ActiveTaskError.Validate("Error Code", CopyStr(GetLastErrorCode(), 1, MaxStrLen(ActiveTaskError."Error Code")));
-        ActiveTaskError.Validate("Error Text", CopyStr(GetLastErrorText(), 1, MaxStrLen(ActiveTaskError."Error Text")));
+        while not ALDTestExecute.AllTestsCompleted() do begin
+            ActiveTestSession.SetRange(State, ActiveTestSession.State::Ready);
+            ActiveTestSession.SetFilter("Scheduled Start DateTime", '<=%1', CurrentDateTime);
+            if ActiveTestSession.FindSet(true) then
+                repeat
+                    StartTestSession(ActiveTestSession);
+                until ActiveTestSession.Next() = 0;
 
-        ActiveTaskError."Error Call Stack".CreateOutStream(BlobOutStream);
-        BlobOutStream.WriteText(GetLastErrorCallStack());
+            Commit();
+            Sleep(LoadTestSetup."Task Update Frequency");
+        end;
 
-        ActiveTaskError.Insert(true);
+        MoveBatchToCompleted();
     end;
+
+    local procedure StartTestSession(var ActiveTestSession: Record "ALD Active Test Session")
+    var
+        SessionCompanyName: Text;
+    begin
+        if DelChr(ActiveTestSession."Company Name", '<>', ' ') = '' then
+            SessionCompanyName := CompanyName()
+        else
+            SessionCompanyName := ActiveTestSession."Company Name";
+
+        if StartSession(
+            ActiveTestSession."Client Session ID", Codeunit::"ALD Session Task Controller", SessionCompanyName, ActiveTestSession)
+        then begin
+            ActiveTestSession.Validate(State, ActiveTestSession.State::Running);
+            ActiveTestSession.Validate("Start DateTime", CurrentDateTime);
+        end
+        else
+            ActiveTestSession.Validate(State, ActiveTestSession.State::Failed);
+
+        ActiveTestSession.Modify(true);
+        Commit();
+    end;
+
+    procedure TerminateActiveSessions()
+    var
+        ActiveTestSession: Record "ALD Active Test Session";
+        ActiveTestBatch: Record "ALD Active Test Batch";
+    begin
+        if ActiveTestSession.FindSet(true) then
+            repeat
+                StopSession(ActiveTestSession."Client Session ID");
+                ActiveTestSession.Validate(State, ActiveTestSession.State::Terminated);
+                ActiveTestSession.Validate("End DateTime", CurrentDateTime());
+                ActiveTestSession.Modify(true);
+            until ActiveTestSession.Next() = 0;
+
+        if ActiveTestBatch.FindFirst() then begin
+            StopSession(ActiveTestBatch."Controller Session ID");
+            // TODO: Batch should also have a state
+            //ActiveTestBatch.Validate(State, ActiveTestBatch.State::Terminated);
+            ActiveTestBatch.Validate("End DateTime", CurrentDateTime());
+            ActiveTestBatch.Modify(true);
+        end;
+    end;
+
+    var
+        ALDTestExecute: Codeunit "ALD Test - Execute";
 }

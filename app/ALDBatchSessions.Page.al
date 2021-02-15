@@ -21,6 +21,7 @@ page 55102 "ALD Batch Sessions"
                 field("Company Name"; "Company Name")
                 {
                     ToolTip = 'The name of the company in which the session will be executed.';
+                    ApplicationArea = All;
                 }
             }
             part(TasksSubpage; "ALD Test Session Subform")

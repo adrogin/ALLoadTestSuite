@@ -1,0 +1,9 @@
+*.app
+*.dll
+*.flf
+test/.vscode/rad.json
+.output
+.alPackages
+.alcache
+.altemplates
+app/.vscode/rad.json

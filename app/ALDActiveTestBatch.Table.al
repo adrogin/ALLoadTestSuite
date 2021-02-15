@@ -29,6 +29,11 @@ table 55104 "ALD Active Test Batch"
             Caption = 'End Date/Time';
             DataClassification = CustomerContent;
         }
+        field(100; "Controller Session ID"; Integer)
+        {
+            Caption = 'Controller Session ID';
+            DataClassification = SystemMetadata;
+        }
     }
 
     keys

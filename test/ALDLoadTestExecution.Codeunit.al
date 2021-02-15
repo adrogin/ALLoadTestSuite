@@ -1,59 +1,59 @@
-codeunit 65101 "Load Test Execution ALD"
+codeunit 65101 "ALD Load Test Execution"
 {
     Subtype = Test;
 
     [Test]
     procedure ActiveTestBatchExistsWhenRecInActiveTestBatch()
     var
-        LoadTestActiveBatch: Record "Load Test Active Batch ALD";
+        ActiveTestBatch: Record "ALD Active Test Batch";
     begin
         // [SCENARIO] LoadTestManager.ActiveTestBatchExists returns "true" if a record in the "Load Test Active Batch" exists
-        LibraryLoadTest.MockActiveTestBatch(LoadTestActiveBatch);
-        Assert.IsTrue(LoadTestExec.ActiveTestBatchExists(), UnexpectedFunctionValueErr);
+        LibraryLoadTest.MockActiveTestBatch(ActiveTestBatch);
+        Assert.IsTrue(TestExecute.ActiveTestBatchExists(), UnexpectedFunctionValueErr);
     end;
 
     [Test]
     procedure ActiveTestBatchNotExistsWhenActiveTestBatchRecEmpty()
     var
-        LoadTestActiveBatch: Record "Load Test Active Batch ALD";
+        ActiveTestBatch: Record "ALD Active Test Batch";
     begin
         // [SCENARIO] LoadTestManager.ActiveTestBatchExists returns "false" if a record in the "Load Test Active Batch" does not exist
-        LoadTestActiveBatch.DeleteAll();
-        Assert.IsFalse(LoadTestExec.ActiveTestBatchExists(), UnexpectedFunctionValueErr);
+        ActiveTestBatch.DeleteAll();
+        Assert.IsFalse(TestExecute.ActiveTestBatchExists(), UnexpectedFunctionValueErr);
     end;
 
     [Test]
     procedure VerifyNoActiveTestErrorWhenActiveBatchFound()
     var
-        LoadTestActiveBatch: Record "Load Test Active Batch ALD";
+        ActiveTestBatch: Record "ALD Active Test Batch";
         CannotRunMultipleBatchesErr: Label 'Test batch cannot start while another batch is running';
     begin
         // [SCENARIO] LoadTestManager.VerifyNoActiveTest throws an error if a record in the "Load Test Active Batch" exists
-        LibraryLoadTest.MockActiveTestBatch(LoadTestActiveBatch);
-        asserterror LoadTestExec.VerifyNoActiveTest();
+        LibraryLoadTest.MockActiveTestBatch(ActiveTestBatch);
+        asserterror TestExecute.VerifyNoActiveTest();
         Assert.ExpectedError(CannotRunMultipleBatchesErr);
     end;
 
     [Test]
     procedure StartBatchCopiesBatchToActive()
     var
-        LoadTestBatch: Record "Load Test Batch ALD";
-        LoadTestBatchSession: Record "Load Test Batch Session ALD";
+        TestBatch: Record "ALD Test Batch";
+        BatchSession: Record "ALD Batch Session";
     begin
         // [SCENARIO] Start Test Batch action copies the selected batch and its configuration into the active batch config.
 
         Initialize();
 
         // [GIVEN] Load test batch with two test sessions
-        LibraryLoadTest.CreateTestBatch(LoadTestBatch);
-        LibraryLoadTest.CreateTestBatchSession(LoadTestBatch.Name, LoadTestBatchSession);
-        LibraryLoadTest.CreateTestBatchSession(LoadTestBatch.Name, LoadTestBatchSession);
+        LibraryLoadTest.CreateTestBatch(TestBatch);
+        LibraryLoadTest.CreateTestBatchSession(TestBatch.Name, BatchSession);
+        LibraryLoadTest.CreateTestBatchSession(TestBatch.Name, BatchSession);
 
         // [WHEN] Execute the batch
-        LoadTestExec.RunTestBatch(LoadTestBatch.Name);
+        TestExecute.RunTestBatch(TestBatch.Name);
 
         // [THEN] Batch sessions are copied to the active batch
-        VerifyActiveBatch(LoadTestBatch.Name);
+        VerifyActiveBatch(TestBatch.Name);
     end;
 
     procedure StartSessionMultipleClonesInitialized()
@@ -76,21 +76,21 @@ codeunit 65101 "Load Test Execution ALD"
 
     local procedure VerifyActiveBatch(BatchName: Code[20])
     var
-        LoadTestActiveBatch: Record "Load Test Active Batch ALD";
-        LoadTestActiveSession: Record "Load Test Active Session ALD";
-        LoadTestBatchSession: Record "Load Test Batch Session ALD";
+        ActiveTestBatch: Record "ALD Active Test Batch";
+        ActiveTestSession: Record "ALD Active Test Session";
+        BatchSession: Record "ALD Batch Session";
     begin
-        LoadTestActiveBatch.SetRange("Batch Name", BatchName);
-        Assert.RecordCount(LoadTestActiveBatch, 1);
+        ActiveTestBatch.SetRange("Batch Name", BatchName);
+        Assert.RecordCount(ActiveTestBatch, 1);
 
-        LoadTestBatchSession.SetRange("Batch Name", BatchName);
-        LoadTestActiveSession.SetRange("Batch Name", BatchName);
-        Assert.RecordCount(LoadTestActiveSession, LoadTestBatchSession.Count());
+        BatchSession.SetRange("Batch Name", BatchName);
+        ActiveTestSession.SetRange("Batch Name", BatchName);
+        Assert.RecordCount(ActiveTestSession, BatchSession.Count());
     end;
 
     var
-        LoadTestExec: Codeunit "Load Test - Execute ALD";
-        LibraryLoadTest: Codeunit "Library - Load Test ALD";
+        TestExecute: Codeunit "ALD Test - Execute";
+        LibraryLoadTest: Codeunit "ALD Library - Load Test";
         Assert: Codeunit Assert;
         UnexpectedFunctionValueErr: Label 'Unexpected function return value.';
         IsInitialized: Boolean;

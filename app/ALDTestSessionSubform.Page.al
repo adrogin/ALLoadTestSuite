@@ -32,6 +32,11 @@ page 55103 "ALD Test Session Subform"
                     ApplicationArea = All;
                     ToolTip = 'Specifies the ID of the object to run';
                 }
+                field(Rec; Rec."Object Name")
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'The name of the object to run';
+                }
             }
         }
     }

@@ -1,4 +1,4 @@
-codeunit 59100 "Sleep ALD"
+codeunit 59100 "ALD Sleep"
 {
     trigger OnRun()
     begin
