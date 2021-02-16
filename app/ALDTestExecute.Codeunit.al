@@ -47,9 +47,8 @@ codeunit 55100 "ALD Test - Execute"
     begin
         ActiveTestBatch.Get(BatchSession."Batch Name");
         TestSession.Get(BatchSession."Session Code");
-        CloneCount := 1;
 
-        while CloneCount <= TestSession."No. of Clones" do begin
+        for CloneCount := 1 to TestSession."No. of Clones" do begin
             ActiveTestSession.Validate("Batch Name", BatchSession."Batch Name");
             ActiveTestSession.Validate("Session No.", TestSession.Code);
             ActiveTestSession.Validate("Clone No.", CloneCount);
@@ -60,8 +59,6 @@ codeunit 55100 "ALD Test - Execute"
             ActiveTestSession.Insert(true);
 
             CopySessionTasksToActive(ActiveTestSession);
-
-            CloneCount += 1;
         end;
     end;
 

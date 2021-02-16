@@ -49,8 +49,8 @@ page 55101 "ALD Test Batches"
                     LoadTestExecute: Codeunit "ALD Test - Execute";
                     ActiveTestBatch: Page "ALD Active Test Batch";
                 begin
-                    ActiveTestBatch.Run();
                     LoadTestExecute.RunTestBatch(Rec.Name);
+                    ActiveTestBatch.Run();
                 end;
             }
         }

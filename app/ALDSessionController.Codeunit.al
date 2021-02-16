@@ -74,12 +74,14 @@ codeunit 55104 "ALD Session Controller"
         while not ALDTestExecute.AllTestsCompleted() do begin
             ActiveTestSession.SetRange(State, ActiveTestSession.State::Ready);
             ActiveTestSession.SetFilter("Scheduled Start DateTime", '<=%1', CurrentDateTime);
-            if ActiveTestSession.FindSet(true) then
+            if ActiveTestSession.FindSet() then begin
                 repeat
                     StartTestSession(ActiveTestSession);
                 until ActiveTestSession.Next() = 0;
 
-            Commit();
+                Commit();
+            end;
+
             Sleep(LoadTestSetup."Task Update Frequency");
         end;
 
@@ -88,23 +90,27 @@ codeunit 55104 "ALD Session Controller"
 
     local procedure StartTestSession(var ActiveTestSession: Record "ALD Active Test Session")
     var
+        ActiveClientSession: Record "ALD Active Client Session";
         SessionCompanyName: Text;
+        SessionId: Integer;
     begin
         if DelChr(ActiveTestSession."Company Name", '<>', ' ') = '' then
             SessionCompanyName := CompanyName()
         else
             SessionCompanyName := ActiveTestSession."Company Name";
 
-        if StartSession(
-            ActiveTestSession."Client Session ID", Codeunit::"ALD Session Task Controller", SessionCompanyName, ActiveTestSession)
-        then begin
-            ActiveTestSession.Validate(State, ActiveTestSession.State::Running);
-            ActiveTestSession.Validate("Start DateTime", CurrentDateTime);
+        if StartSession(SessionId, Codeunit::"ALD Session Task Controller", SessionCompanyName, ActiveTestSession) then begin
+            ActiveClientSession.Validate("Batch Name", ActiveTestSession."Batch Name");
+            ActiveClientSession.Validate("Session No.", ActiveTestSession."Session No.");
+            ActiveClientSession.Validate("Clone No.", ActiveTestSession."Clone No.");
+            ActiveClientSession.Validate("Client Session ID", SessionId);
+            ActiveClientSession.Insert(true);
         end
-        else
+        else begin
             ActiveTestSession.Validate(State, ActiveTestSession.State::Failed);
+            ActiveTestSession.Modify(true);
+        end;
 
-        ActiveTestSession.Modify(true);
         Commit();
     end;
 
@@ -113,8 +119,9 @@ codeunit 55104 "ALD Session Controller"
         ActiveTestSession: Record "ALD Active Test Session";
         ActiveTestBatch: Record "ALD Active Test Batch";
     begin
-        if ActiveTestSession.FindSet(true) then
+        if ActiveTestSession.FindSet() then
             repeat
+                ActiveTestSession.CalcFields("Client Session ID");
                 StopSession(ActiveTestSession."Client Session ID");
                 ActiveTestSession.Validate(State, ActiveTestSession.State::Terminated);
                 ActiveTestSession.Validate("End DateTime", CurrentDateTime());

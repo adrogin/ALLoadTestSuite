@@ -26,8 +26,10 @@ table 55106 "ALD Active Test Session"
         field(40; "Client Session ID"; Integer)
         {
             Caption = 'Client Session ID';
-            TableRelation = Session."Connection ID";
             Editable = false;
+            FieldClass = FlowField;
+            CalcFormula = lookup("ALD Active Client Session"."Client Session ID"
+                where("Batch Name" = field("Batch Name"), "Session No." = field("Session No."), "Clone No." = field("Clone No.")));
         }
         field(50; "Scheduled Start DateTime"; DateTime)
         {

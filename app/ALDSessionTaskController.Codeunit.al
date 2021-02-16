@@ -11,7 +11,12 @@ codeunit 55102 "ALD Session Task Controller"
     var
         ActiveTestTask: Record "ALD Active Test Task";
         TaskRunner: Codeunit "ALD Task Runner";
+        IsTaskSuccessful: Boolean;
+        IsSessionSuccessful: Boolean;
     begin
+        SetSessionRunningState(ActiveTestSession);
+
+        IsSessionSuccessful := true;
         ActiveTestTask.SetRange("Session No.", ActiveTestSession."Session No.");
         ActiveTestTask.SetRange("Session Clone No.", ActiveTestSession."Clone No.");
         if ActiveTestTask.FindSet() then
@@ -19,13 +24,32 @@ codeunit 55102 "ALD Session Task Controller"
                 SetTaskStatusRunning(ActiveTestTask);
 
                 Commit();
-                if TaskRunner.Run(ActiveTestTask) then
+                IsTaskSuccessful := TaskRunner.Run(ActiveTestTask);
+                if IsTaskSuccessful then
                     SetTaskStatusCompleted(ActiveTestTask)
                 else
                     SetTaskStatusFailed(ActiveTestTask);
+
+                IsSessionSuccessful := IsSessionSuccessful and IsTaskSuccessful;
             until ActiveTestTask.Next() = 0;
 
-        ActiveTestSession.Validate(State, ActiveTestSession.State::Completed);
+        SetSessionFinalState(ActiveTestSession, IsSessionSuccessful);
+    end;
+
+    local procedure SetSessionRunningState(var ActiveTestSession: Record "ALD Active Test Session")
+    begin
+        ActiveTestSession.Validate(State, ActiveTestSession.State::Running);
+        ActiveTestSession.Validate("Start DateTime", CurrentDateTime);
+        ActiveTestSession.Modify(true);
+    end;
+
+    local procedure SetSessionFinalState(var ActiveTestSession: Record "ALD Active Test Session"; IsSuccess: Boolean)
+    begin
+        if IsSuccess then
+            ActiveTestSession.Validate(State, ActiveTestSession.State::Completed)
+        else
+            ActiveTestSession.Validate(State, ActiveTestSession.State::Failed);
+
         ActiveTestSession.Validate("End DateTime", CurrentDateTime);
         ActiveTestSession.Modify(true);
     end;
