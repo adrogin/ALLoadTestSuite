@@ -40,10 +40,15 @@ page 55107 "ALD Active Sessions Subpage"
                     ApplicationArea = All;
                     ToolTip = 'Date and time when the session completed or was terminated.';
                 }
-                field(Rec; Rec."Company Name")
+                field(CompanyName; Rec."Company Name")
                 {
                     ApplicationArea = All;
                     ToolTip = 'Name of the company in which the session is executed';
+                }
+                field("Duration"; Rec.Duration)
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'The duration of the session.';
                 }
             }
         }

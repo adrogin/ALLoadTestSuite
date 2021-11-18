@@ -15,7 +15,7 @@ table 55106 "ALD Active Test Session"
         field(20; "Session No."; Code[20])
         {
             Caption = 'Session No.';
-            TableRelation = "ALD Batch Session" where("Batch Name" = field("Batch Name"));
+            TableRelation = "ALD Batch Session"."Session Code" where("Batch Name" = field("Batch Name"));
             Editable = false;
         }
         field(30; "Clone No."; Integer)
@@ -45,6 +45,13 @@ table 55106 "ALD Active Test Session"
         {
             Caption = 'End Date/Time';
             Editable = false;
+
+            trigger OnValidate()
+            var
+                TestExecute: Codeunit "ALD Test - Execute";
+            begin
+                Rec.Validate("Duration", TestExecute.GetDuration(Rec."Start DateTime", Rec."End DateTime"));
+            end;
         }
         field(80; State; Option)
         {
@@ -58,6 +65,11 @@ table 55106 "ALD Active Test Session"
         {
             Caption = 'Company Name';
             TableRelation = Company;
+            Editable = false;
+        }
+        field(100; "Duration"; Integer)
+        {
+            Caption = 'Duration';
             Editable = false;
         }
     }

@@ -49,6 +49,11 @@ page 55108 "ALD Active Tasks Subpage"
                     ApplicationArea = All;
                     ToolTip = 'Date and time when the task was completed or terminated.';
                 }
+                field("Duration"; Rec.Duration)
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'The duration of the task.';
+                }
             }
         }
     }

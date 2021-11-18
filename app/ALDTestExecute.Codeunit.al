@@ -111,6 +111,11 @@ codeunit 55100 "ALD Test - Execute"
             Error(CannotRunMultipleBatchesErr);
     end;
 
+    procedure GetDuration(StartDateTime: DateTime; EndDateTime: DateTime): Integer
+    begin
+        exit(EndDateTime - StartDateTime);
+    end;
+
     var
         CannotRunMultipleBatchesErr: Label 'Test batch cannot start while another batch is running. Wait for the active batch to complete or stop it manually and try again.';
 }

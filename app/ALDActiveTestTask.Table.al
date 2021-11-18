@@ -47,6 +47,13 @@ table 55108 "ALD Active Test Task"
         {
             Caption = 'End Date/Time';
             Editable = false;
+
+            trigger OnValidate()
+            var
+                TestExecute: Codeunit "ALD Test - Execute";
+            begin
+                Rec.Validate("Duration", TestExecute.GetDuration(Rec."Start DateTime", Rec."End DateTime"));
+            end;
         }
         field(80; "Object Type"; Option)
         {
@@ -71,6 +78,11 @@ table 55108 "ALD Active Test Task"
         field(110; Description; Text[30])
         {
             Caption = 'Description';
+            Editable = false;
+        }
+        field(120; "Duration"; Integer)
+        {
+            Caption = 'Duration';
             Editable = false;
         }
     }

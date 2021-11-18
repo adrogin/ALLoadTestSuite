@@ -13,6 +13,8 @@ page 55106 "ALD Active Test Batch"
         {
             group(TestBatch)
             {
+                ShowCaption = false;
+
                 field(BatchName; Rec."Batch Name")
                 {
                     ApplicationArea = All;
@@ -26,9 +28,33 @@ page 55106 "ALD Active Test Batch"
                 field("Start DateTime"; Rec."Start DateTime")
                 {
                     ApplicationArea = All;
-                    ToolTip = 'Date and time when the running batch started.';
+                    ToolTip = 'Date and time when the active batch started.';
+                }
+                field("End DateTime"; Rec."End DateTime")
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Date and time when the active batch completed.';
                 }
             }
+            usercontrol(TimerAddIn; "ALD Timer Event AddIn")
+            {
+                trigger AddInLoaded()
+                var
+                    ALDSetup: Record "ALD Setup";
+                begin
+                    // TODO: UI update frequency should be controlled by a separate configuration
+                    ALDSetup.Get();
+                    ALDSetup.TestField("Task Update Frequency");
+                    CurrPage.TimerAddIn.SetTimerInterval(ALDSetup."Task Update Frequency");
+                end;
+
+                trigger OnTimer()
+                begin
+                    CurrPage.Update(false);
+                    CurrPage.ActiveTestSessions.Page.Update(false);
+                end;
+            }
+
             part(ActiveTestSessions; "ALD Active Sessions Subpage")
             {
                 SubPageLink = "Batch Name" = field("Batch Name");
@@ -52,7 +78,9 @@ page 55106 "ALD Active Test Batch"
             {
                 Caption = 'Terminate Batch';
                 ToolTip = 'Terminates the execution of the active test batch. All test sessions will be stopped immediately.';
+                Image = Cancel;
                 ApplicationArea = All;
+                Enabled = IsActiveBatchRunning;
 
                 trigger OnAction()
                 var
@@ -61,6 +89,30 @@ page 55106 "ALD Active Test Batch"
                     SessionController.TerminateActiveSessions();
                 end;
             }
+
+            action(Rerun)
+            {
+                Caption = 'Re-run Batch';
+                ToolTip = 'Restart the selected test batch.';
+                Image = Replan;
+                Enabled = not IsActiveBatchRunning;
+
+                trigger OnAction()
+                var
+                    LoadTestExecute: Codeunit "ALD Test - Execute";
+                begin
+                    LoadTestExecute.RunTestBatch(Rec."Batch Name");
+                end;
+            }
         }
     }
+
+    trigger OnAfterGetCurrRecord()
+    begin
+        IsActiveBatchRunning := TestExecute.IsActiveBatchRunning();
+    end;
+
+    var
+        TestExecute: Codeunit "ALD Test - Execute";
+        IsActiveBatchRunning: Boolean;
 }

@@ -15,14 +15,33 @@ table 55110 "ALD Completed Test Batch"
             Caption = 'Test Batch Name';
             Editable = false;
         }
-        field(3; "Start DateTime"; DateTime)
+        field(3; Description; Text[50])
+        {
+            Caption = 'Description';
+            FieldClass = FlowField;
+            CalcFormula = lookup("ALD Test Batch".Description where(Name = field("Test Batch Name")));
+            Editable = false;
+        }
+        field(4; "Start DateTime"; DateTime)
         {
             Caption = 'Start Date/Time';
             Editable = false;
         }
-        field(4; "End DateTime"; DateTime)
+        field(5; "End DateTime"; DateTime)
         {
             Caption = 'End Date/Time';
+            Editable = false;
+
+            trigger OnValidate()
+            var
+                TestExecute: Codeunit "ALD Test - Execute";
+            begin
+                Rec.Validate("Duration", TestExecute.GetDuration(Rec."Start DateTime", Rec."End DateTime"));
+            end;
+        }
+        field(7; "Duration"; Integer)
+        {
+            Caption = 'Duration';
             Editable = false;
         }
     }
