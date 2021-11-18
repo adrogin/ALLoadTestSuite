@@ -6,33 +6,42 @@ table 55104 "ALD Active Test Batch"
 
     fields
     {
-        field(1; "Batch Name"; Code[20])
+        field(2; "Batch Name"; Code[20])
         {
             Caption = 'Batch Name';
             TableRelation = "ALD Test Batch";
-            DataClassification = CustomerContent;
         }
-        field(2; Description; Text[50])
+        field(3; Description; Text[50])
         {
             Caption = 'Description';
             FieldClass = FlowField;
             CalcFormula = lookup("ALD Test Batch".Description where(Name = field("Batch Name")));
             Editable = false;
         }
-        field(3; "Start DateTime"; DateTime)
+        field(4; "Start DateTime"; DateTime)
         {
             Caption = 'Start Date/Time';
-            DataClassification = CustomerContent;
         }
-        field(4; "End DateTime"; DateTime)
+        field(5; "End DateTime"; DateTime)
         {
             Caption = 'End Date/Time';
-            DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            var
+                TestExecute: Codeunit "ALD Test - Execute";
+            begin
+                Rec.Validate("Duration", TestExecute.GetDuration(Rec."Start DateTime", Rec."End DateTime"));
+            end;
         }
-        field(100; "Controller Session ID"; Integer)
+        field(6; "Controller Session ID"; Integer)
         {
             Caption = 'Controller Session ID';
             DataClassification = SystemMetadata;
+        }
+        field(7; "Duration"; Integer)
+        {
+            Caption = 'Duration';
+            Editable = false;
         }
     }
 

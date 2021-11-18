@@ -77,6 +77,11 @@ table 55112 "ALD Completed Test Task"
             Caption = 'Description';
             Editable = false;
         }
+        field(120; "Duration"; Integer)
+        {
+            Caption = 'Duration';
+            Editable = false;
+        }
     }
 
     keys

@@ -21,10 +21,8 @@ codeunit 55104 "ALD Session Controller"
         CompletedTestBatch: Record "ALD Completed Test Batch";
     begin
         ActiveTestBatch.FindFirst();
+        CompletedTestBatch.TransferFields(ActiveTestBatch);
         CompletedTestBatch.Validate("Test Run No.", GetNextTestBatchNo());
-        CompletedTestBatch.Validate("Test Batch Name", ActiveTestBatch."Batch Name");
-        CompletedTestBatch.Validate("Start DateTime", ActiveTestBatch."Start DateTime");
-        CompletedTestBatch.Validate("End DateTime", CurrentDateTime());
         CompletedTestBatch.Insert(true);
 
         MoveSessionsToCompleted(CompletedTestBatch);
