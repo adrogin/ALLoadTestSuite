@@ -49,12 +49,22 @@ page 55108 "ALD Active Tasks Subpage"
                     ApplicationArea = All;
                     ToolTip = 'Date and time when the task was completed or terminated.';
                 }
-                field("Duration"; Rec.Duration)
+                field("Duration"; TaskDuration)
                 {
+                    Caption = 'Duration';
                     ApplicationArea = All;
                     ToolTip = 'The duration of the task.';
                 }
             }
         }
     }
+
+    trigger OnAfterGetRecord()
+    begin
+        TaskDuration := TestExecute.FormatTestDuration(Rec.Duration);
+    end;
+
+    var
+        TestExecute: Codeunit "ALD Test - Execute";
+        TaskDuration: Text;
 }

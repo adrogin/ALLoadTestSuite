@@ -36,6 +36,20 @@ page 55106 "ALD Active Test Batch"
                     ToolTip = 'Date and time when the active batch completed.';
                 }
             }
+
+            part(ActiveTestSessions; "ALD Active Sessions Subpage")
+            {
+                SubPageLink = "Batch Name" = field("Batch Name");
+                ApplicationArea = All;
+            }
+
+            part(ActiveTestTasks; "ALD Active Tasks Subpage")
+            {
+                Provider = ActiveTestSessions;
+                SubPageLink = "Batch Name" = field("Batch Name"), "Session No." = field("Session No."), "Session Clone No." = field("Clone No.");
+                ApplicationArea = All;
+            }
+
             usercontrol(TimerAddIn; "ALD Timer Event AddIn")
             {
                 trigger AddInLoaded()
@@ -54,18 +68,17 @@ page 55106 "ALD Active Test Batch"
                     CurrPage.ActiveTestSessions.Page.Update(false);
                 end;
             }
+        }
 
-            part(ActiveTestSessions; "ALD Active Sessions Subpage")
+        area(FactBoxes)
+        {
+            part(Errors; "ALD Active Task Errors Factbox")
             {
-                SubPageLink = "Batch Name" = field("Batch Name");
                 ApplicationArea = All;
-            }
-
-            part(ActiveTestTasks; "ALD Active Tasks Subpage")
-            {
-                Provider = ActiveTestSessions;
-                SubPageLink = "Batch Name" = field("Batch Name"), "Session No." = field("Session No."), "Session Clone No." = field("Clone No.");
-                ApplicationArea = All;
+                Provider = ActiveTestTasks;
+                SubPageLink =
+                    "Batch Name" = field("Batch Name"), "Session No." = field("Session No."),
+                    "Session Clone No." = field("Session Clone No."), "Task No." = field("Task No.");
             }
         }
     }

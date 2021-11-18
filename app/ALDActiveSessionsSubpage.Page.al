@@ -40,17 +40,27 @@ page 55107 "ALD Active Sessions Subpage"
                     ApplicationArea = All;
                     ToolTip = 'Date and time when the session completed or was terminated.';
                 }
+                field("Duration"; SessionDuration)
+                {
+                    Caption = 'Duration';
+                    ApplicationArea = All;
+                    ToolTip = 'The duration of the session.';
+                }
                 field(CompanyName; Rec."Company Name")
                 {
                     ApplicationArea = All;
                     ToolTip = 'Name of the company in which the session is executed';
                 }
-                field("Duration"; Rec.Duration)
-                {
-                    ApplicationArea = All;
-                    ToolTip = 'The duration of the session.';
-                }
             }
         }
     }
+
+    trigger OnAfterGetRecord()
+    begin
+        SessionDuration := TestExecute.FormatTestDuration(Rec.Duration);
+    end;
+
+    var
+        TestExecute: Codeunit "ALD Test - Execute";
+        SessionDuration: Text;
 }

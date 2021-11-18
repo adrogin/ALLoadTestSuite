@@ -10,18 +10,15 @@ table 55106 "ALD Active Test Session"
         {
             Caption = 'Batch Name';
             TableRelation = "ALD Test Batch";
-            Editable = false;
         }
         field(20; "Session No."; Code[20])
         {
             Caption = 'Session No.';
             TableRelation = "ALD Batch Session"."Session Code" where("Batch Name" = field("Batch Name"));
-            Editable = false;
         }
         field(30; "Clone No."; Integer)
         {
             Caption = 'Clone No.';
-            Editable = false;
         }
         field(40; "Client Session ID"; Integer)
         {
@@ -34,17 +31,14 @@ table 55106 "ALD Active Test Session"
         field(50; "Scheduled Start DateTime"; DateTime)
         {
             Caption = 'Scheduled Start Date/Time';
-            Editable = false;
         }
         field(60; "Start DateTime"; DateTime)
         {
             Caption = 'Start Date/Time';
-            Editable = false;
         }
         field(70; "End DateTime"; DateTime)
         {
             Caption = 'End Date/Time';
-            Editable = false;
 
             trigger OnValidate()
             var
@@ -53,24 +47,19 @@ table 55106 "ALD Active Test Session"
                 Rec.Validate("Duration", TestExecute.GetDuration(Rec."Start DateTime", Rec."End DateTime"));
             end;
         }
-        field(80; State; Option)
+        field(80; State; Enum "ALD Test State")
         {
             Caption = 'State';
-            OptionMembers = Ready,Running,Completed,Failed,Terminated;
-            OptionCaption = 'Ready,Running,Completed,Failed,Terminated';
             InitValue = Ready;
-            Editable = false;
         }
         field(90; "Company Name"; Text[30])
         {
             Caption = 'Company Name';
             TableRelation = Company;
-            Editable = false;
         }
         field(100; "Duration"; Integer)
         {
             Caption = 'Duration';
-            Editable = false;
         }
     }
 
