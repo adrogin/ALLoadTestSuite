@@ -74,10 +74,16 @@ table 55106 "ALD Active Test Session"
     trigger OnDelete()
     var
         ActiveTestTask: Record "ALD Active Test Task";
+        ActiveTaskError: Record "ALD Active Task Error";
     begin
         ActiveTestTask.SetRange("Batch Name", Rec."Batch Name");
         ActiveTestTask.SetRange("Session No.", Rec."Session No.");
         ActiveTestTask.SetRange("Session Clone No.", Rec."Clone No.");
         ActiveTestTask.DeleteAll(true);
+
+        ActiveTaskError.SetRange("Batch Name", Rec."Batch Name");
+        ActiveTaskError.SetRange("Session No.", Rec."Session No.");
+        ActiveTaskError.SetRange("Session Clone No.", Rec."Clone No.");
+        ActiveTaskError.DeleteAll(true);
     end;
 }

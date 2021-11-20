@@ -30,8 +30,12 @@ page 55109 "ALD Active Task Errors Factbox"
     var
         InStr: InStream;
     begin
-        Rec."Error Text".CreateInStream(InStr);
-        InStr.ReadText(ErrorText);
+        ErrorText := '';
+        Rec.CalcFields("Error Text");
+        if Rec."Error Text".HasValue() then begin
+            Rec."Error Text".CreateInStream(InStr);
+            InStr.ReadText(ErrorText);
+        end;
     end;
 
     var

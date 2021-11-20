@@ -35,16 +35,19 @@ page 55113 "ALD Completed Test Batch Card"
                 }
             }
 
-            part(ActiveTestSessions; "ALD Active Sessions Subpage")
+            part(TestSessions; "ALD Completed Sessions Subpage")
             {
-                SubPageLink = "Batch Name" = field("Test Batch Name");
+                SubPageLink = "Test Run No." = field("Test Run No."), "Test Batch Name" = field("Test Batch Name");
                 ApplicationArea = All;
             }
 
-            part(ActiveTestTasks; "ALD Active Tasks Subpage")
+            part(ActiveTestTasks; "ALD Completed Tasks Subpage")
             {
-                Provider = ActiveTestSessions;
-                SubPageLink = "Batch Name" = field("Batch Name"), "Session No." = field("Session No."), "Session Clone No." = field("Clone No.");
+                Provider = TestSessions;
+                SubPageLink =
+                    "Test Run No." = field("Test Run No."), "Batch Name" = field("Test Batch Name"),
+                    "Session No." = field("Session No."), "Session Clone No." = field("Clone No.");
+
                 ApplicationArea = All;
             }
         }

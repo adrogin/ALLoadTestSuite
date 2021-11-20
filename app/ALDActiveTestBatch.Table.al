@@ -61,8 +61,12 @@ table 55104 "ALD Active Test Batch"
     trigger OnDelete()
     var
         ActiveTestSession: Record "ALD Active Test Session";
+        ActiveClientSession: Record "ALD Active Client Session";
     begin
         ActiveTestSession.SetRange("Batch Name", Rec."Batch Name");
         ActiveTestSession.DeleteAll(true);
+
+        ActiveClientSession.SetRange("Batch Name", Rec."Batch Name");
+        ActiveClientSession.DeleteAll(true);
     end;
 }

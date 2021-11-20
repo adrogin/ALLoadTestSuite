@@ -7,6 +7,8 @@ page 55110 "ALD Completed Test Batch List"
     Caption = 'Completed Test Batches';
     CardPageId = "ALD Completed Test Batch Card";
     Editable = false;
+    InsertAllowed = false;
+    DeleteAllowed = false;
 
     layout
     {

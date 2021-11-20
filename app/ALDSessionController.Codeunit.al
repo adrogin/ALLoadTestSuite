@@ -21,10 +21,12 @@ codeunit 55104 "ALD Session Controller"
         CompletedTestBatch: Record "ALD Completed Test Batch";
     begin
         ActiveTestBatch.FindFirst();
+        ActiveTestBatch.Validate(State, CompletedTestBatch.State::Completed);
+        ActiveTestBatch.Validate("End DateTime", CurrentDateTime());
+        ActiveTestBatch.Modify(true);
+
         CompletedTestBatch.TransferFields(ActiveTestBatch);
         CompletedTestBatch.Validate("Test Run No.", GetNextTestBatchNo());
-        CompletedTestBatch.Validate(State, CompletedTestBatch.State::Completed);
-        CompletedTestBatch.Validate("End DateTime", CurrentDateTime());
         CompletedTestBatch.Insert(true);
 
         MoveSessionsToCompleted(CompletedTestBatch);
@@ -60,7 +62,26 @@ codeunit 55104 "ALD Session Controller"
                 CompletedTestTask.Validate("Test Run No.", CompletedTestSession."Test Run No.");
                 CompletedTestTask.TransferFields(ActiveTestTask, true);
                 CompletedTestTask.Insert(true);
+
+                CopyTaskErrorsToCompleted(CompletedTestTask);
             until ActiveTestTask.Next() = 0;
+    end;
+
+    local procedure CopyTaskErrorsToCompleted(CompletedTestTask: Record "ALD Completed Test Task")
+    var
+        ActiveTaskError: Record "ALD Active Task Error";
+        CompletedTaskError: Record "ALD Completed Task Error";
+    begin
+        ActiveTaskError.SetRange("Batch Name", CompletedTestTask."Batch Name");
+        ActiveTaskError.SetRange("Session No.", CompletedTestTask."Session No.");
+        ActiveTaskError.SetRange("Session Clone No.", CompletedTestTask."Session Clone No.");
+        ActiveTaskError.SetRange("Task No.", CompletedTestTask."Task No.");
+        if ActiveTaskError.FindSet() then
+            repeat
+                CompletedTaskError.TransferFields(ActiveTaskError);
+                CompletedTaskError.Validate("Test Run No.", CompletedTestTask."Test Run No.");
+                CompletedTaskError.Insert(true);
+            until ActiveTaskError.Next() = 0;
     end;
 
     local procedure RunSessionControlLoop()

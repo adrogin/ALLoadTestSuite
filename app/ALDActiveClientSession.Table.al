@@ -13,7 +13,7 @@ table 55113 "ALD Active Client Session"
         field(20; "Session No."; Code[20])
         {
             Caption = 'Session No.';
-            TableRelation = "ALD Batch Session" where("Batch Name" = field("Batch Name"));
+            TableRelation = "ALD Batch Session"."Session Code" where("Batch Name" = field("Batch Name"));
             Editable = false;
         }
         field(30; "Clone No."; Integer)
