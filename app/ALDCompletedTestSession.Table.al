@@ -32,16 +32,18 @@ table 55111 "ALD Completed Test Session"
         {
             Caption = 'End Date/Time';
         }
-        field(80; State; Option)
+        field(80; State; Enum "ALD Completed Test State")
         {
             Caption = 'State';
-            OptionMembers = ,,Completed,Failed,Terminated;
-            OptionCaption = ',,Completed,Failed,Terminated';
         }
-        field(90; "Duration"; Integer)
+        field(90; "Company Name"; Text[30])
+        {
+            Caption = 'Company Name';
+            TableRelation = Company;
+        }
+        field(100; "Duration"; Integer)
         {
             Caption = 'Duration';
-            Editable = false;
         }
     }
 

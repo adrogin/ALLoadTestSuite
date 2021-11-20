@@ -1,11 +1,14 @@
-page 55110 "ALD Completed Test Batches"
+page 55110 "ALD Completed Test Batch List"
 {
     PageType = List;
     ApplicationArea = All;
     UsageCategory = Lists;
     SourceTable = "ALD Completed Test Batch";
     Caption = 'Completed Test Batches';
+    CardPageId = "ALD Completed Test Batch Card";
     Editable = false;
+    InsertAllowed = false;
+    DeleteAllowed = false;
 
     layout
     {

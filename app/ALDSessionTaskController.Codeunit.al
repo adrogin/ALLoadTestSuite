@@ -69,20 +69,27 @@ codeunit 55102 "ALD Session Task Controller"
     end;
 
     local procedure SetTaskStatusFailed(var ActiveTestTask: Record "ALD Active Test Task")
-    var
-        ActiveTaskError: Record "ALD Active Task Error";
-        BlobOutStream: OutStream;
     begin
         ActiveTestTask.Validate(State, ActiveTestTask.State::Failed);
         ActiveTestTask.Validate("End DateTime", CurrentDateTime);
         ActiveTestTask.Modify(true);
 
+        SaveErrorInfo(ActiveTestTask);
+    end;
+
+    local procedure SaveErrorInfo(ActiveTestTask: Record "ALD Active Test Task")
+    var
+        ActiveTaskError: Record "ALD Active Task Error";
+        BlobOutStream: OutStream;
+    begin
         ActiveTaskError.Validate("Batch Name", ActiveTestTask."Batch Name");
         ActiveTaskError.Validate("Session No.", ActiveTestTask."Session No.");
         ActiveTaskError.Validate("Session Clone No.", ActiveTestTask."Session Clone No.");
         ActiveTaskError.Validate("Task No.", ActiveTestTask."Task No.");
         ActiveTaskError.Validate("Error Code", CopyStr(GetLastErrorCode(), 1, MaxStrLen(ActiveTaskError."Error Code")));
-        ActiveTaskError.Validate("Error Text", CopyStr(GetLastErrorText(), 1, MaxStrLen(ActiveTaskError."Error Text")));
+
+        ActiveTaskError."Error Text".CreateOutStream(BlobOutStream);
+        BlobOutStream.WriteText(GetLastErrorText());
 
         ActiveTaskError."Error Call Stack".CreateOutStream(BlobOutStream);
         BlobOutStream.WriteText(GetLastErrorCallStack());

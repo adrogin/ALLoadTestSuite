@@ -16,12 +16,28 @@ page 55109 "ALD Active Task Errors Factbox"
                     ApplicationArea = All;
                     ToolTip = 'Code of the error which interrupted the task.';
                 }
-                field(ErrorText; Rec."Error Text")
+                field(ErrorTextControl; ErrorText)
                 {
+                    Caption = 'Error Text';
                     ApplicationArea = All;
-                    ToolTip = 'Error message of the error which interrupted the task.';
+                    ToolTip = 'Text of the error which interrupted the task.';
                 }
             }
         }
     }
+
+    trigger OnAfterGetRecord()
+    var
+        InStr: InStream;
+    begin
+        ErrorText := '';
+        Rec.CalcFields("Error Text");
+        if Rec."Error Text".HasValue() then begin
+            Rec."Error Text".CreateInStream(InStr);
+            InStr.ReadText(ErrorText);
+        end;
+    end;
+
+    var
+        ErrorText: Text;
 }

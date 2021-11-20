@@ -26,6 +26,9 @@ table 55105 "ALD Batch Session"
                 else begin
                     LoadTestSession.Get("Session Code");
                     Rec.Validate("Company Name", LoadTestSession."Company Name");
+                    Rec.Validate("No. of Clones", LoadTestSession."No. of Clones");
+                    Rec.Validate("Delay Between Clones", LoadTestSession."Delay Between Clones");
+                    Rec.Validate("Session Start Delay", LoadTestSession."Session Start Delay");
                 end;
             end;
         }
@@ -44,6 +47,31 @@ table 55105 "ALD Batch Session"
             Caption = 'Company Name';
             TableRelation = Company.Name;
         }
+        field(6; "No. of Clones"; Integer)
+        {
+            Caption = 'No. of Clones';
+            MinValue = 1;
+            InitValue = 1;
+        }
+        field(7; "Session Start Delay"; Integer)
+        {
+            Caption = 'First Session Delay (ms)';
+
+            trigger OnValidate()
+            begin
+                TestExecute.CheckDelayTime("Session Start Delay");
+            end;
+        }
+        field(8; "Delay Between Clones"; Integer)
+        {
+            DataClassification = CustomerContent;
+            Caption = 'Delay Between Clones (ms)';
+
+            trigger OnValidate()
+            begin
+                TestExecute.CheckDelayTime("Delay Between Clones");
+            end;
+        }
     }
 
     keys
@@ -53,4 +81,7 @@ table 55105 "ALD Batch Session"
             Clustered = true;
         }
     }
+
+    var
+        TestExecute: Codeunit "ALD Test - Execute";
 }

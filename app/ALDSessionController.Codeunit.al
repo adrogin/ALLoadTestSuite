@@ -21,6 +21,10 @@ codeunit 55104 "ALD Session Controller"
         CompletedTestBatch: Record "ALD Completed Test Batch";
     begin
         ActiveTestBatch.FindFirst();
+        ActiveTestBatch.Validate(State, CompletedTestBatch.State::Completed);
+        ActiveTestBatch.Validate("End DateTime", CurrentDateTime());
+        ActiveTestBatch.Modify(true);
+
         CompletedTestBatch.TransferFields(ActiveTestBatch);
         CompletedTestBatch.Validate("Test Run No.", GetNextTestBatchNo());
         CompletedTestBatch.Insert(true);
@@ -58,7 +62,26 @@ codeunit 55104 "ALD Session Controller"
                 CompletedTestTask.Validate("Test Run No.", CompletedTestSession."Test Run No.");
                 CompletedTestTask.TransferFields(ActiveTestTask, true);
                 CompletedTestTask.Insert(true);
+
+                CopyTaskErrorsToCompleted(CompletedTestTask);
             until ActiveTestTask.Next() = 0;
+    end;
+
+    local procedure CopyTaskErrorsToCompleted(CompletedTestTask: Record "ALD Completed Test Task")
+    var
+        ActiveTaskError: Record "ALD Active Task Error";
+        CompletedTaskError: Record "ALD Completed Task Error";
+    begin
+        ActiveTaskError.SetRange("Batch Name", CompletedTestTask."Batch Name");
+        ActiveTaskError.SetRange("Session No.", CompletedTestTask."Session No.");
+        ActiveTaskError.SetRange("Session Clone No.", CompletedTestTask."Session Clone No.");
+        ActiveTaskError.SetRange("Task No.", CompletedTestTask."Task No.");
+        if ActiveTaskError.FindSet() then
+            repeat
+                CompletedTaskError.TransferFields(ActiveTaskError);
+                CompletedTaskError.Validate("Test Run No.", CompletedTestTask."Test Run No.");
+                CompletedTaskError.Insert(true);
+            until ActiveTaskError.Next() = 0;
     end;
 
     local procedure RunSessionControlLoop()
@@ -119,19 +142,41 @@ codeunit 55104 "ALD Session Controller"
     begin
         if ActiveTestSession.FindSet() then
             repeat
-                ActiveTestSession.CalcFields("Client Session ID");
-                StopSession(ActiveTestSession."Client Session ID");
-                ActiveTestSession.Validate(State, ActiveTestSession.State::Terminated);
-                ActiveTestSession.Validate("End DateTime", CurrentDateTime());
-                ActiveTestSession.Modify(true);
+                TerminateTestSession(ActiveTestSession);
             until ActiveTestSession.Next() = 0;
 
         if ActiveTestBatch.FindFirst() then begin
             StopSession(ActiveTestBatch."Controller Session ID");
-            // TODO: Batch should also have a state
-            //ActiveTestBatch.Validate(State, ActiveTestBatch.State::Terminated);
+            ActiveTestBatch.Validate(State, ActiveTestBatch.State::Terminated);
             ActiveTestBatch.Validate("End DateTime", CurrentDateTime());
             ActiveTestBatch.Modify(true);
+        end;
+    end;
+
+    local procedure TerminateTestSession(var ActiveTestSession: Record "ALD Active Test Session")
+    begin
+        ActiveTestSession.CalcFields("Client Session ID");
+        StopSession(ActiveTestSession."Client Session ID");
+        ActiveTestSession.Validate(State, ActiveTestSession.State::Terminated);
+        ActiveTestSession.Validate("End DateTime", CurrentDateTime());
+        ActiveTestSession.Modify(true);
+
+        TerminateSessionTasks(ActiveTestSession);
+    end;
+
+    local procedure TerminateSessionTasks(ActiveTestSession: Record "ALD Active Test Session")
+    var
+        ActiveTestTask: Record "ALD Active Test Task";
+    begin
+        ActiveTestTask.SetRange(State, ActiveTestTask.State::Running);
+        ActiveTestTask.SetRange("Batch Name", ActiveTestSession."Batch Name");
+        ActiveTestTask.SetRange("Session No.", ActiveTestSession."Session No.");
+        ActiveTestTask.SetRange("Session Clone No.", ActiveTestSession."Clone No.");
+
+        if ActiveTestTask.FindFirst() then begin
+            ActiveTestTask.Validate(State, ActiveTestTask.state::Terminated);
+            ActiveTestTask.Validate("End DateTime", CurrentDateTime());
+            ActiveTestTask.Modify(true);
         end;
     end;
 

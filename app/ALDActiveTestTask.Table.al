@@ -30,11 +30,9 @@ table 55108 "ALD Active Test Task"
             TableRelation = "ALD Test Task"."Task No." where("Session Code" = field("Session No."));
             Editable = false;
         }
-        field(50; State; Option)
+        field(50; State; Enum "ALD Test State")
         {
             Caption = 'State';
-            OptionMembers = Ready,Running,Completed,Failed,Terminated;
-            OptionCaption = 'Ready,Running,Completed,Failed,Terminated';
             InitValue = Ready;
             Editable = false;
         }

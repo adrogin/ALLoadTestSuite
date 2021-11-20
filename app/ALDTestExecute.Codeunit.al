@@ -41,21 +41,19 @@ codeunit 55100 "ALD Test - Execute"
     local procedure CopyBatchSessionToActive(BatchSession: Record "ALD Batch Session")
     var
         ActiveTestBatch: Record "ALD Active Test Batch";
-        TestSession: Record "ALD Test Session";
         ActiveTestSession: Record "ALD Active Test Session";
         CloneCount: Integer;
     begin
         ActiveTestBatch.Get(BatchSession."Batch Name");
-        TestSession.Get(BatchSession."Session Code");
 
-        for CloneCount := 1 to TestSession."No. of Clones" do begin
+        for CloneCount := 1 to BatchSession."No. of Clones" do begin
             ActiveTestSession.Validate("Batch Name", BatchSession."Batch Name");
-            ActiveTestSession.Validate("Session No.", TestSession.Code);
+            ActiveTestSession.Validate("Session No.", BatchSession."Session Code");
             ActiveTestSession.Validate("Clone No.", CloneCount);
             ActiveTestSession.Validate("Company Name", BatchSession."Company Name");
             ActiveTestSession.Validate(
                 "Scheduled Start DateTime",
-                ActiveTestBatch."Start DateTime" + TestSession."Session Start Delay" + TestSession."Delay Between Clones" * (CloneCount - 1));
+                ActiveTestBatch."Start DateTime" + BatchSession."Session Start Delay" + BatchSession."Delay Between Clones" * (CloneCount - 1));
             ActiveTestSession.Insert(true);
 
             CopySessionTasksToActive(ActiveTestSession);
@@ -114,6 +112,22 @@ codeunit 55100 "ALD Test - Execute"
     procedure GetDuration(StartDateTime: DateTime; EndDateTime: DateTime): Integer
     begin
         exit(EndDateTime - StartDateTime);
+    end;
+
+    procedure FormatTestDuration(TestDuration: Integer): Text
+    begin
+        exit(Format(TestDuration / 1000));
+    end;
+
+    procedure CheckDelayTime(NewTime: Integer)
+    var
+        LoadTestSetup: Record "ALD Setup";
+        DelayNotSetupMultipleErr: Label 'Delay time must be a multiple of %1.', Comment = '%1: base time unit multiplier';
+    begin
+        LoadTestSetup.Get();
+        LoadTestSetup.TestField("Task Update Frequency");
+        if NewTime mod LoadTestSetup."Task Update Frequency" <> 0 then
+            Error(DelayNotSetupMultipleErr, LoadTestSetup."Task Update Frequency");
     end;
 
     var

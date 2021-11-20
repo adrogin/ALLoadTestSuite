@@ -44,6 +44,11 @@ table 55110 "ALD Completed Test Batch"
             Caption = 'Duration';
             Editable = false;
         }
+        field(8; State; Enum "ALD Completed Test State")
+        {
+            Caption = 'State';
+            Editable = false;
+        }
     }
 
     keys
