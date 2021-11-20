@@ -17,7 +17,7 @@ codeunit 55102 "ALD Session Task Controller"
         SetSessionRunningState(ActiveTestSession);
 
         IsSessionSuccessful := true;
-        ActiveTestTask.SetRange("Session No.", ActiveTestSession."Session No.");
+        ActiveTestTask.SetRange("Session Code", ActiveTestSession."Session Code");
         ActiveTestTask.SetRange("Session Clone No.", ActiveTestSession."Clone No.");
         if ActiveTestTask.FindSet() then
             repeat
@@ -83,7 +83,7 @@ codeunit 55102 "ALD Session Task Controller"
         BlobOutStream: OutStream;
     begin
         ActiveTaskError.Validate("Batch Name", ActiveTestTask."Batch Name");
-        ActiveTaskError.Validate("Session No.", ActiveTestTask."Session No.");
+        ActiveTaskError.Validate("Session Code", ActiveTestTask."Session Code");
         ActiveTaskError.Validate("Session Clone No.", ActiveTestTask."Session Clone No.");
         ActiveTaskError.Validate("Task No.", ActiveTestTask."Task No.");
         ActiveTaskError.Validate("Error Code", CopyStr(GetLastErrorCode(), 1, MaxStrLen(ActiveTaskError."Error Code")));

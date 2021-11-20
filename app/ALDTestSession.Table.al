@@ -7,7 +7,7 @@ table 55101 "ALD Test Session"
     {
         field(1; "Code"; Code[20])
         {
-            Caption = 'No.';
+            Caption = 'Code';
         }
         field(2; Description; Text[50])
         {

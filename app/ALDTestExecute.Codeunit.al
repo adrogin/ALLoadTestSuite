@@ -48,7 +48,7 @@ codeunit 55100 "ALD Test - Execute"
 
         for CloneCount := 1 to BatchSession."No. of Clones" do begin
             ActiveTestSession.Validate("Batch Name", BatchSession."Batch Name");
-            ActiveTestSession.Validate("Session No.", BatchSession."Session Code");
+            ActiveTestSession.Validate("Session Code", BatchSession."Session Code");
             ActiveTestSession.Validate("Clone No.", CloneCount);
             ActiveTestSession.Validate("Company Name", BatchSession."Company Name");
             ActiveTestSession.Validate(
@@ -65,11 +65,11 @@ codeunit 55100 "ALD Test - Execute"
         TestTask: Record "ALD Test Task";
         ActiveTestTask: Record "ALD Active Test Task";
     begin
-        TestTask.SetRange("Session Code", LoadTestActiveSession."Session No.");
+        TestTask.SetRange("Session Code", LoadTestActiveSession."Session Code");
         if TestTask.FindSet() then
             repeat
                 ActiveTestTask.Validate("Batch Name", LoadTestActiveSession."Batch Name");
-                ActiveTestTask.Validate("Session No.", LoadTestActiveSession."Session No.");
+                ActiveTestTask.Validate("Session Code", LoadTestActiveSession."Session Code");
                 ActiveTestTask.Validate("Session Clone No.", LoadTestActiveSession."Clone No.");
                 ActiveTestTask.Validate("Task No.", TestTask."Task No.");
                 ActiveTestTask.Validate("Object Type", TestTask."Object Type");

@@ -12,22 +12,28 @@ table 55108 "ALD Active Test Task"
             TableRelation = "ALD Active Test Batch";
             Editable = false;
         }
-        field(20; "Session No."; Code[20])
+        field(15; "No."; Integer)
         {
-            Caption = 'Session No.';
-            TableRelation = "ALD Active Test Session"."Session No." where("Batch Name" = field("Batch Name"));
+            Caption = 'No.';
+        }
+        field(20; "Session Code"; Code[20])
+        {
+            Caption = 'Session Code';
+            TableRelation = "ALD Active Test Session"."Session Code" where("Batch Name" = field("Batch Name"));
             Editable = false;
         }
         field(30; "Session Clone No."; Integer)
         {
             Caption = 'Session Clone No.';
-            TableRelation = "ALD Active Test Session"."Clone No." where("Batch Name" = field("Batch Name"), "Session No." = field("Session No."));
+            TableRelation =
+                "ALD Active Test Session"."Clone No."
+                    where("Batch Name" = field("Batch Name"), "No." = field("No."));
             Editable = false;
         }
         field(40; "Task No."; Code[20])
         {
             Caption = 'Task No.';
-            TableRelation = "ALD Test Task"."Task No." where("Session Code" = field("Session No."));
+            TableRelation = "ALD Test Task"."Task No." where("Session Code" = field("Session Code"));
             Editable = false;
         }
         field(50; State; Enum "ALD Test State")
@@ -87,7 +93,7 @@ table 55108 "ALD Active Test Task"
 
     keys
     {
-        key(PK; "Batch Name", "Session No.", "Session Clone No.", "Task No.")
+        key(PK; "Batch Name", "No.", "Session Clone No.", "Task No.")
         {
             Clustered = true;
         }

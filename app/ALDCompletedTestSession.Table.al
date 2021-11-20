@@ -15,9 +15,13 @@ table 55111 "ALD Completed Test Session"
             Caption = 'Test Batch No.';
             TableRelation = "ALD Completed Test Batch"."Test Batch Name" where("Test Run No." = field("Test Run No."));
         }
-        field(20; "Session No."; Code[20])
+        field(15; "No."; Integer)
         {
-            Caption = 'Session No.';
+            Caption = 'No.';
+        }
+        field(20; "Session Code"; Code[20])
+        {
+            Caption = 'Session Code';
             TableRelation = "ALD Batch Session"."Session Code" where("Batch Name" = field("Test Batch Name"));
         }
         field(30; "Clone No."; Integer)
@@ -49,11 +53,11 @@ table 55111 "ALD Completed Test Session"
 
     keys
     {
-        key(PK; "Test Run No.", "Session No.", "Clone No.")
+        key(PK; "Test Run No.", "No.", "Clone No.")
         {
             Clustered = true;
         }
-        key(BatchSession; "Test Batch Name", "Session No.", "Clone No.") { }
+        key(BatchSession; "Test Batch Name") { }
         key(RunDateTime; "Start DateTime", "End DateTime") { }
     }
 }

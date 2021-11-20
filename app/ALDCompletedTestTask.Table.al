@@ -15,10 +15,14 @@ table 55112 "ALD Completed Test Task"
             Caption = 'Test Batch Name';
             TableRelation = "ALD Completed Test Batch"."Test Batch Name" where("Test Run No." = field("Test Run No."));
         }
-        field(20; "Session No."; Code[20])
+        field(15; "No."; Integer)
         {
-            Caption = 'Session No.';
-            TableRelation = "ALD Completed Test Session"."Session No." where("Test Run No." = field("Test Run No."));
+            Caption = 'No.';
+        }
+        field(20; "Session Code"; Code[20])
+        {
+            Caption = 'Session Code';
+            TableRelation = "ALD Completed Test Session"."Session Code" where("Test Run No." = field("Test Run No."));
         }
         field(30; "Session Clone No."; Integer)
         {
@@ -28,7 +32,7 @@ table 55112 "ALD Completed Test Task"
         field(40; "Task No."; Code[20])
         {
             Caption = 'Task No.';
-            TableRelation = "ALD Test Task"."Task No." where("Session Code" = field("Session No."));
+            TableRelation = "ALD Test Task"."Task No." where("Session Code" = field("Session Code"));
         }
         field(50; State; Enum "ALD Completed Test State")
         {
@@ -73,11 +77,11 @@ table 55112 "ALD Completed Test Task"
 
     keys
     {
-        key(PK; "Test Run No.", "Session No.", "Session Clone No.", "Task No.")
+        key(PK; "Test Run No.", "No.", "Session Clone No.", "Task No.")
         {
             Clustered = true;
         }
-        key(BatchTask; "Batch Name", "Session No.", "Session Clone No.", "Task No.") { }
+        key(BatchTask; "Batch Name") { }
         key(RunDateTime; "Start DateTime", "End DateTime") { }
     }
 }

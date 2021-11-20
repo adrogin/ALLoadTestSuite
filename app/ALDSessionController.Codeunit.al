@@ -55,7 +55,7 @@ codeunit 55104 "ALD Session Controller"
     begin
         ActiveTestTask.LockTable();
         ActiveTestTask.SetRange("Batch Name", CompletedTestSession."Test Batch Name");
-        ActiveTestTask.SetRange("Session No.", CompletedTestSession."Session No.");
+        ActiveTestTask.SetRange("Session Code", CompletedTestSession."Session Code");
         ActiveTestTask.SetRange("Session Clone No.", CompletedTestSession."Clone No.");
         if ActiveTestTask.FindSet(true) then
             repeat
@@ -73,7 +73,7 @@ codeunit 55104 "ALD Session Controller"
         CompletedTaskError: Record "ALD Completed Task Error";
     begin
         ActiveTaskError.SetRange("Batch Name", CompletedTestTask."Batch Name");
-        ActiveTaskError.SetRange("Session No.", CompletedTestTask."Session No.");
+        ActiveTaskError.SetRange("No.", CompletedTestTask."No.");
         ActiveTaskError.SetRange("Session Clone No.", CompletedTestTask."Session Clone No.");
         ActiveTaskError.SetRange("Task No.", CompletedTestTask."Task No.");
         if ActiveTaskError.FindSet() then
@@ -122,7 +122,7 @@ codeunit 55104 "ALD Session Controller"
 
         if StartSession(SessionId, Codeunit::"ALD Session Task Controller", SessionCompanyName, ActiveTestSession) then begin
             ActiveClientSession.Validate("Batch Name", ActiveTestSession."Batch Name");
-            ActiveClientSession.Validate("Session No.", ActiveTestSession."Session No.");
+            ActiveClientSession.Validate("No.", ActiveTestSession."No.");
             ActiveClientSession.Validate("Clone No.", ActiveTestSession."Clone No.");
             ActiveClientSession.Validate("Client Session ID", SessionId);
             ActiveClientSession.Insert(true);
@@ -170,7 +170,7 @@ codeunit 55104 "ALD Session Controller"
     begin
         ActiveTestTask.SetRange(State, ActiveTestTask.State::Running);
         ActiveTestTask.SetRange("Batch Name", ActiveTestSession."Batch Name");
-        ActiveTestTask.SetRange("Session No.", ActiveTestSession."Session No.");
+        ActiveTestTask.SetRange("Session Code", ActiveTestSession."Session Code");
         ActiveTestTask.SetRange("Session Clone No.", ActiveTestSession."Clone No.");
 
         if ActiveTestTask.FindFirst() then begin

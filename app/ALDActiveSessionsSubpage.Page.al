@@ -10,7 +10,7 @@ page 55107 "ALD Active Sessions Subpage"
         {
             repeater(SessionDetails)
             {
-                field(SessionNo; Rec."Session No.")
+                field(SessionCode; Rec."Session Code")
                 {
                     ApplicationArea = All;
                     ToolTip = 'Sequential number of the session in the batch.';

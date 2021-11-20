@@ -10,9 +10,13 @@ table 55113 "ALD Active Client Session"
             TableRelation = "ALD Test Batch";
             Editable = false;
         }
-        field(20; "Session No."; Code[20])
+        field(15; "No."; Integer)
         {
-            Caption = 'Session No.';
+            Caption = 'No.';
+        }
+        field(20; "Session Code"; Code[20])
+        {
+            Caption = 'Session Code';
             TableRelation = "ALD Batch Session"."Session Code" where("Batch Name" = field("Batch Name"));
             Editable = false;
         }
@@ -31,7 +35,7 @@ table 55113 "ALD Active Client Session"
 
     keys
     {
-        key(PK; "Batch Name", "Session No.", "Clone No.")
+        key(PK; "Batch Name", "No.", "Clone No.")
         {
             Clustered = true;
         }

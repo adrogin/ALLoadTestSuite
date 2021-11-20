@@ -25,6 +25,11 @@ page 55110 "ALD Completed Test Batch List"
                 {
                     ApplicationArea = All;
                     ToolTip = 'The name of the test batch.';
+
+                    trigger OnDrillDown()
+                    begin
+                        Page.Run(Page::"ALD Completed Test Batch Card", Rec);
+                    end;
                 }
                 field("Start DateTime"; "Start DateTime")
                 {
