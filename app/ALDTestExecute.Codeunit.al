@@ -48,8 +48,9 @@ codeunit 55100 "ALD Test - Execute"
 
         for CloneCount := 1 to BatchSession."No. of Clones" do begin
             ActiveTestSession.Validate("Batch Name", BatchSession."Batch Name");
-            ActiveTestSession.Validate("Session Code", BatchSession."Session Code");
+            ActiveTestSession.Validate("No.", BatchSession."No.");
             ActiveTestSession.Validate("Clone No.", CloneCount);
+            ActiveTestSession.Validate("Session Code", BatchSession."Session Code");
             ActiveTestSession.Validate("Company Name", BatchSession."Company Name");
             ActiveTestSession.Validate(
                 "Scheduled Start DateTime",
@@ -60,17 +61,18 @@ codeunit 55100 "ALD Test - Execute"
         end;
     end;
 
-    local procedure CopySessionTasksToActive(LoadTestActiveSession: Record "ALD Active Test Session")
+    local procedure CopySessionTasksToActive(ActiveTestSession: Record "ALD Active Test Session")
     var
         TestTask: Record "ALD Test Task";
         ActiveTestTask: Record "ALD Active Test Task";
     begin
-        TestTask.SetRange("Session Code", LoadTestActiveSession."Session Code");
+        TestTask.SetRange("Session Code", ActiveTestSession."Session Code");
         if TestTask.FindSet() then
             repeat
-                ActiveTestTask.Validate("Batch Name", LoadTestActiveSession."Batch Name");
-                ActiveTestTask.Validate("Session Code", LoadTestActiveSession."Session Code");
-                ActiveTestTask.Validate("Session Clone No.", LoadTestActiveSession."Clone No.");
+                ActiveTestTask.Validate("Batch Name", ActiveTestSession."Batch Name");
+                ActiveTestTask.Validate("No.", ActiveTestSession."No.");
+                ActiveTestTask.Validate("Session Clone No.", ActiveTestSession."Clone No.");
+                ActiveTestTask.Validate("Session Code", ActiveTestSession."Session Code");
                 ActiveTestTask.Validate("Task No.", TestTask."Task No.");
                 ActiveTestTask.Validate("Object Type", TestTask."Object Type");
                 ActiveTestTask.Validate("Object ID", TestTask."Object ID");

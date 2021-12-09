@@ -12,7 +12,7 @@ page 55102 "ALD Batch Sessions"
             {
                 Caption = 'Test Sessions';
 
-                field(No; Rec."No.")
+                field(SequenceNo; Rec."Sequence No.")
                 {
                     ApplicationArea = All;
                     ToolTip = 'The sequential number of the session within the batch.';
@@ -57,7 +57,8 @@ page 55102 "ALD Batch Sessions"
     var
         BatchSession: Record "ALD Batch Session";
     begin
-        "Sequence No." := xRec."Sequence No." + 1;
+        Rec."No." := Rec.GetLastSessionNo() + 1;
+        Rec."Sequence No." := xRec."Sequence No." + 1;
         if not BelowxRec then begin
             BatchSession.SetRange("Batch Name", Rec."Batch Name");
             BatchSession.SetFilter("Sequence No.", '>%1', xRec."Sequence No.");
