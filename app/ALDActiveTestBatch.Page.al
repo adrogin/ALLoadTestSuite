@@ -46,7 +46,8 @@ page 55106 "ALD Active Test Batch"
             part(ActiveTestTasks; "ALD Active Tasks Subpage")
             {
                 Provider = ActiveTestSessions;
-                SubPageLink = "Batch Name" = field("Batch Name"), "Session No." = field("Session No."), "Session Clone No." = field("Clone No.");
+                SubPageLink =
+                    "Batch Name" = field("Batch Name"), "No." = field("No."), "Session Clone No." = field("Clone No.");
                 ApplicationArea = All;
             }
 
@@ -77,7 +78,7 @@ page 55106 "ALD Active Test Batch"
                 ApplicationArea = All;
                 Provider = ActiveTestTasks;
                 SubPageLink =
-                    "Batch Name" = field("Batch Name"), "Session No." = field("Session No."),
+                    "Batch Name" = field("Batch Name"), "No." = field("No."),
                     "Session Clone No." = field("Session Clone No."), "Task No." = field("Task No.");
             }
         }

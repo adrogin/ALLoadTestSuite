@@ -7,7 +7,7 @@ table 55107 "ALD Test Task"
     {
         field(1; "Session Code"; Code[20])
         {
-            Caption = 'Session No.';
+            Caption = 'Session Code';
             TableRelation = "ALD Test Session";
             DataClassification = CustomerContent;
         }

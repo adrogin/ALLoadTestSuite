@@ -4,6 +4,7 @@ page 55113 "ALD Completed Test Batch Card"
     SourceTable = "ALD Completed Test Batch";
     Caption = 'Completed Load Test Batch';
     Editable = false;
+    DataCaptionFields = "Test Run No.", "Test Batch Name";
 
     layout
     {
@@ -46,7 +47,7 @@ page 55113 "ALD Completed Test Batch Card"
                 Provider = TestSessions;
                 SubPageLink =
                     "Test Run No." = field("Test Run No."), "Batch Name" = field("Test Batch Name"),
-                    "Session No." = field("Session No."), "Session Clone No." = field("Clone No.");
+                    "No." = field("No."), "Session Clone No." = field("Clone No.");
 
                 ApplicationArea = All;
             }

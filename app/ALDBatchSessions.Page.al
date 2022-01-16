@@ -3,8 +3,6 @@ page 55102 "ALD Batch Sessions"
     PageType = List;
     SourceTable = "ALD Batch Session";
     Caption = 'Batch Sessions';
-    UsageCategory = Lists;
-    ApplicationArea = All;
 
     layout
     {
@@ -14,7 +12,7 @@ page 55102 "ALD Batch Sessions"
             {
                 Caption = 'Test Sessions';
 
-                field(SequenceNo; Rec."Session Sequence No.")
+                field(No; Rec."No.")
                 {
                     ApplicationArea = All;
                     ToolTip = 'The sequential number of the session within the batch.';
@@ -54,4 +52,21 @@ page 55102 "ALD Batch Sessions"
             }
         }
     }
+
+    trigger OnNewRecord(BelowxRec: Boolean)
+    var
+        BatchSession: Record "ALD Batch Session";
+    begin
+        "Sequence No." := xRec."Sequence No." + 1;
+        if not BelowxRec then begin
+            BatchSession.SetRange("Batch Name", Rec."Batch Name");
+            BatchSession.SetFilter("Sequence No.", '>%1', xRec."Sequence No.");
+            BatchSession.Ascending(false);
+            BatchSession.FindSet(true);
+            repeat
+                BatchSession."Sequence No." += 1;
+                BatchSession.Modify(true);
+            until BatchSession.Next() = 0;
+        end;
+    end;
 }

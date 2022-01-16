@@ -13,28 +13,21 @@ table 55105 "ALD Batch Session"
         }
         field(2; "Session Code"; Code[20])
         {
-            Caption = 'Session No.';
+            Caption = 'Session Code';
             TableRelation = "ALD Test Session";
             NotBlank = true;
 
             trigger OnValidate()
-            var
-                LoadTestSession: Record "ALD Test Session";
             begin
                 if "Session Code" = '' then
-                    Validate("Company Name", '')
-                else begin
-                    LoadTestSession.Get("Session Code");
-                    Rec.Validate("Company Name", LoadTestSession."Company Name");
-                    Rec.Validate("No. of Clones", LoadTestSession."No. of Clones");
-                    Rec.Validate("Delay Between Clones", LoadTestSession."Delay Between Clones");
-                    Rec.Validate("Session Start Delay", LoadTestSession."Session Start Delay");
-                end;
+                    ClearSessionSettings()
+                else
+                    CopySessionSettings("Session Code");
             end;
         }
-        field(3; "Session Sequence No."; Integer)
+        field(3; "No."; Integer)
         {
-            Caption = 'Session Sequence No.';
+            Caption = 'No.';
         }
         field(4; "Session Description"; Text[50])
         {
@@ -64,7 +57,6 @@ table 55105 "ALD Batch Session"
         }
         field(8; "Delay Between Clones"; Integer)
         {
-            DataClassification = CustomerContent;
             Caption = 'Delay Between Clones (ms)';
 
             trigger OnValidate()
@@ -72,15 +64,49 @@ table 55105 "ALD Batch Session"
                 TestExecute.CheckDelayTime("Delay Between Clones");
             end;
         }
+        field(9; "Sequence No."; Integer)
+        {
+            Caption = 'Sequence No.';
+        }
     }
 
     keys
     {
-        key(PK; "Batch Name", "Session Code")
+        key(PK; "Batch Name", "No.")
         {
             Clustered = true;
         }
     }
+
+    local procedure ClearSessionSettings()
+    begin
+        Rec.Validate("Company Name", '');
+        Rec.Validate("No. of Clones", 0);
+        Rec.Validate("Delay Between Clones", 0);
+        Rec.Validate("Session Start Delay", 0);
+    end;
+
+    local procedure CopySessionSettings(FromTestSessionCode: Code[20])
+    var
+        TestSession: Record "ALD Test Session";
+    begin
+        TestSession.Get(FromTestSessionCode);
+        Rec.Validate("Company Name", TestSession."Company Name");
+        Rec.Validate("No. of Clones", TestSession."No. of Clones");
+        Rec.Validate("Delay Between Clones", TestSession."Delay Between Clones");
+        Rec.Validate("Session Start Delay", TestSession."Session Start Delay");
+    end;
+
+    procedure GetLastSessionNo(): Integer
+    var
+        BatchSession: Record "ALD Batch Session";
+    begin
+        BatchSession.SetRange("Batch Name", Rec."Batch Name");
+        if BatchSession.FindLast() then
+            exit(BatchSession."No.");
+
+        exit(0);
+    end;
 
     var
         TestExecute: Codeunit "ALD Test - Execute";

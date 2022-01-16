@@ -11,9 +11,13 @@ table 55106 "ALD Active Test Session"
             Caption = 'Batch Name';
             TableRelation = "ALD Test Batch";
         }
-        field(20; "Session No."; Code[20])
+        field(15; "No."; Integer)
         {
-            Caption = 'Session No.';
+            Caption = 'No.';
+        }
+        field(20; "Session Code"; Code[20])
+        {
+            Caption = 'Session Code';
             TableRelation = "ALD Batch Session"."Session Code" where("Batch Name" = field("Batch Name"));
         }
         field(30; "Clone No."; Integer)
@@ -26,7 +30,7 @@ table 55106 "ALD Active Test Session"
             Editable = false;
             FieldClass = FlowField;
             CalcFormula = lookup("ALD Active Client Session"."Client Session ID"
-                where("Batch Name" = field("Batch Name"), "Session No." = field("Session No."), "Clone No." = field("Clone No.")));
+                where("Batch Name" = field("Batch Name"), "Session Code" = field("Session Code"), "Clone No." = field("Clone No.")));
         }
         field(50; "Scheduled Start DateTime"; DateTime)
         {
@@ -65,7 +69,7 @@ table 55106 "ALD Active Test Session"
 
     keys
     {
-        key(PK; "Batch Name", "Session No.", "Clone No.")
+        key(PK; "Batch Name", "No.", "Clone No.")
         {
             Clustered = true;
         }
@@ -77,12 +81,12 @@ table 55106 "ALD Active Test Session"
         ActiveTaskError: Record "ALD Active Task Error";
     begin
         ActiveTestTask.SetRange("Batch Name", Rec."Batch Name");
-        ActiveTestTask.SetRange("Session No.", Rec."Session No.");
+        ActiveTestTask.SetRange("Session Code", Rec."Session Code");
         ActiveTestTask.SetRange("Session Clone No.", Rec."Clone No.");
         ActiveTestTask.DeleteAll(true);
 
         ActiveTaskError.SetRange("Batch Name", Rec."Batch Name");
-        ActiveTaskError.SetRange("Session No.", Rec."Session No.");
+        ActiveTaskError.SetRange("Session Code", Rec."Session Code");
         ActiveTaskError.SetRange("Session Clone No.", Rec."Clone No.");
         ActiveTaskError.DeleteAll(true);
     end;
