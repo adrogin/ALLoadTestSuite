@@ -17,7 +17,8 @@ codeunit 55102 "ALD Session Task Controller"
         SetSessionRunningState(ActiveTestSession);
 
         IsSessionSuccessful := true;
-        ActiveTestTask.SetRange("Session Code", ActiveTestSession."Session Code");
+        ActiveTestTask.SetRange("Batch Name", ActiveTestSession."Batch Name");
+        ActiveTestTask.SetRange("No.", ActiveTestSession."No.");
         ActiveTestTask.SetRange("Session Clone No.", ActiveTestSession."Clone No.");
         if ActiveTestTask.FindSet() then
             repeat
