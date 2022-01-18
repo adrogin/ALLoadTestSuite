@@ -140,6 +140,7 @@ codeunit 55104 "ALD Session Controller"
         ActiveTestSession: Record "ALD Active Test Session";
         ActiveTestBatch: Record "ALD Active Test Batch";
     begin
+        ActiveTestSession.SetFilter(State, '%1|%2', ActiveTestSession.State::Ready, ActiveTestSession.State::Running);
         if ActiveTestSession.FindSet() then
             repeat
                 TerminateTestSession(ActiveTestSession);
