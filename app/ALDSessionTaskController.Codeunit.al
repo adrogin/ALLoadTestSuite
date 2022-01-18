@@ -84,6 +84,7 @@ codeunit 55102 "ALD Session Task Controller"
         BlobOutStream: OutStream;
     begin
         ActiveTaskError.Validate("Batch Name", ActiveTestTask."Batch Name");
+        ActiveTaskError.Validate("No.", ActiveTestTask."No.");
         ActiveTaskError.Validate("Session Code", ActiveTestTask."Session Code");
         ActiveTaskError.Validate("Session Clone No.", ActiveTestTask."Session Clone No.");
         ActiveTaskError.Validate("Task No.", ActiveTestTask."Task No.");
