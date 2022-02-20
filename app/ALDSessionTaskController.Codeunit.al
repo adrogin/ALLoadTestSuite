@@ -40,7 +40,7 @@ codeunit 55102 "ALD Session Task Controller"
     local procedure SetSessionRunningState(var ActiveTestSession: Record "ALD Active Test Session")
     begin
         ActiveTestSession.Validate(State, ActiveTestSession.State::Running);
-        ActiveTestSession.Validate("Start DateTime", CurrentDateTime);
+        ActiveTestSession.Validate("Start DateTime", CurrentDateTime());
         ActiveTestSession.Modify(true);
     end;
 
@@ -51,28 +51,28 @@ codeunit 55102 "ALD Session Task Controller"
         else
             ActiveTestSession.Validate(State, ActiveTestSession.State::Failed);
 
-        ActiveTestSession.Validate("End DateTime", CurrentDateTime);
+        ActiveTestSession.Validate("End DateTime", CurrentDateTime());
         ActiveTestSession.Modify(true);
     end;
 
     local procedure SetTaskStatusRunning(var ActiveTestTask: Record "ALD Active Test Task")
     begin
         ActiveTestTask.Validate(State, ActiveTestTask.State::Running);
-        ActiveTestTask.Validate("Start DateTime", CurrentDateTime);
+        ActiveTestTask.Validate("Start DateTime", CurrentDateTime());
         ActiveTestTask.Modify(true);
     end;
 
     local procedure SetTaskStatusCompleted(var ActiveTestTask: Record "ALD Active Test Task")
     begin
         ActiveTestTask.Validate(State, ActiveTestTask.State::Completed);
-        ActiveTestTask.Validate("End DateTime", CurrentDateTime);
+        ActiveTestTask.Validate("End DateTime", CurrentDateTime());
         ActiveTestTask.Modify(true);
     end;
 
     local procedure SetTaskStatusFailed(var ActiveTestTask: Record "ALD Active Test Task")
     begin
         ActiveTestTask.Validate(State, ActiveTestTask.State::Failed);
-        ActiveTestTask.Validate("End DateTime", CurrentDateTime);
+        ActiveTestTask.Validate("End DateTime", CurrentDateTime());
         ActiveTestTask.Modify(true);
 
         SaveErrorInfo(ActiveTestTask);

@@ -33,10 +33,10 @@
     },
     {
       "from": 59100,
-      "to": 59999
+      "to": 59199
     }
   ],
   "contextSensitiveHelpUrl": "https://ALLoad.com/help/",
   "showMyCode": true,
-  "runtime": "5.0"
+  "runtime": "6.0"
 }

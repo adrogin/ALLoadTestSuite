@@ -31,12 +31,12 @@ page 55110 "ALD Completed Test Batch List"
                         Page.Run(Page::"ALD Completed Test Batch Card", Rec);
                     end;
                 }
-                field("Start DateTime"; "Start DateTime")
+                field("Start DateTime"; Rec."Start DateTime")
                 {
                     ApplicationArea = All;
                     ToolTip = 'Date and time when the test batch started.';
                 }
-                field("End DateTime"; "End DateTime")
+                field("End DateTime"; Rec."End DateTime")
                 {
                     ApplicationArea = All;
                     ToolTip = 'Date and time when the test batch completed or was terminated.';
