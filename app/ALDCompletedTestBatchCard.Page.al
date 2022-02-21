@@ -42,12 +42,25 @@ page 55113 "ALD Completed Test Batch Card"
                 ApplicationArea = All;
             }
 
-            part(ActiveTestTasks; "ALD Completed Tasks Subpage")
+            part(TestTasks; "ALD Completed Tasks Subpage")
             {
                 Provider = TestSessions;
                 SubPageLink =
                     "Test Run No." = field("Test Run No."), "Batch Name" = field("Test Batch Name"),
                     "No." = field("No."), "Session Clone No." = field("Clone No.");
+
+                ApplicationArea = All;
+            }
+        }
+        area(FactBoxes)
+        {
+            part(TaskErrors; "ALD Completed Task Err Factbox")
+            {
+                Caption = 'Task Error';
+                Provider = TestTasks;
+                SubPageLink =
+                    "Test Run No." = field("Test Run No."), "No." = field("No."),
+                    "Session Clone No." = field("Session Clone No."), "Task No." = field("Task No.");
 
                 ApplicationArea = All;
             }

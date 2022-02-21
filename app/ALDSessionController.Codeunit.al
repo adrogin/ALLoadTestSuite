@@ -78,6 +78,9 @@ codeunit 55104 "ALD Session Controller"
         ActiveTaskError.SetRange("Task No.", CompletedTestTask."Task No.");
         if ActiveTaskError.FindSet() then
             repeat
+                if ActiveTaskError."Error Text".HasValue or ActiveTaskError."Error Call Stack".HasValue then
+                    ActiveTaskError.CalcFields("Error Text", "Error Call Stack");
+
                 CompletedTaskError.TransferFields(ActiveTaskError);
                 CompletedTaskError.Validate("Test Run No.", CompletedTestTask."Test Run No.");
                 CompletedTaskError.Insert(true);

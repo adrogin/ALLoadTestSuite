@@ -11,6 +11,8 @@ page 55114 "ALD Completed Task Err Factbox"
         {
             group(GroupName)
             {
+                ShowCaption = false;
+
                 field(ErrorCode; Rec."Error Code")
                 {
                     ApplicationArea = All;
