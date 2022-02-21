@@ -9,8 +9,10 @@ page 55109 "ALD Active Task Errors Factbox"
     {
         area(Content)
         {
-            group(GroupName)
+            group(ErrorInfo)
             {
+                ShowCaption = false;
+
                 field(ErrorCode; Rec."Error Code")
                 {
                     ApplicationArea = All;
@@ -21,6 +23,7 @@ page 55109 "ALD Active Task Errors Factbox"
                     Caption = 'Error Text';
                     ApplicationArea = All;
                     ToolTip = 'Text of the error which interrupted the task.';
+                    MultiLine = true;
                 }
             }
         }
@@ -29,12 +32,18 @@ page 55109 "ALD Active Task Errors Factbox"
     trigger OnAfterGetRecord()
     var
         InStr: InStream;
+        ErrorLine: Text;
+        LineFeed: Char;
     begin
+        LineFeed := 10;
         ErrorText := '';
         Rec.CalcFields("Error Text");
         if Rec."Error Text".HasValue() then begin
             Rec."Error Text".CreateInStream(InStr);
-            InStr.ReadText(ErrorText);
+            while not InStr.EOS do begin
+                InStr.ReadText(ErrorLine);
+                ErrorText += ErrorLine + LineFeed;
+            end;
         end;
     end;
 

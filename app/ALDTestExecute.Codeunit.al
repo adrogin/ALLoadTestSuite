@@ -61,12 +61,12 @@ codeunit 55100 "ALD Test - Execute"
         end;
     end;
 
-    local procedure CopySessionTasksToActive(LoadTestActiveSession: Record "ALD Active Test Session")
+    local procedure CopySessionTasksToActive(ActiveTestSession: Record "ALD Active Test Session")
     var
         TestTask: Record "ALD Test Task";
         ActiveTestTask: Record "ALD Active Test Task";
     begin
-        TestTask.SetRange("Session Code", LoadTestActiveSession."Session Code");
+        TestTask.SetRange("Session Code", ActiveTestSession."Session Code");
         if TestTask.FindSet() then
             repeat
                 ActiveTestTask.Validate("Batch Name", LoadTestActiveSession."Batch Name");
