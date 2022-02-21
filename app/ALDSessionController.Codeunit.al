@@ -55,7 +55,7 @@ codeunit 55104 "ALD Session Controller"
     begin
         ActiveTestTask.LockTable();
         ActiveTestTask.SetRange("Batch Name", CompletedTestSession."Test Batch Name");
-        ActiveTestTask.SetRange("Session Code", CompletedTestSession."Session Code");
+        ActiveTestTask.SetRange("No.", CompletedTestSession."No.");
         ActiveTestTask.SetRange("Session Clone No.", CompletedTestSession."Clone No.");
         if ActiveTestTask.FindSet(true) then
             repeat
@@ -169,9 +169,9 @@ codeunit 55104 "ALD Session Controller"
     var
         ActiveTestTask: Record "ALD Active Test Task";
     begin
-        ActiveTestTask.SetRange(State, ActiveTestTask.State::Running);
+        ActiveTestTask.SetFilter(State, '%1|%2', ActiveTestTask.State::Ready, ActiveTestTask.State::Running);
         ActiveTestTask.SetRange("Batch Name", ActiveTestSession."Batch Name");
-        ActiveTestTask.SetRange("Session Code", ActiveTestSession."Session Code");
+        ActiveTestTask.SetRange("No.", ActiveTestSession."No.");
         ActiveTestTask.SetRange("Session Clone No.", ActiveTestSession."Clone No.");
 
         if ActiveTestTask.FindFirst() then begin
